@@ -2,7 +2,7 @@ setmode -bs
 setcable -port auto
 identify -inferir
 identifympm
-attachflash -position 2 -bpi "28F256P30"
-assignfiletoattachedflash -position 2 -file "download.mcs"
+attachflash -position 2 -bpi "XCF128X"
+assignfiletoattachedflash -position 2 -file "bootloader.mcs"
 program -p 2 -dataWidth 16 -rs1 NONE -rs0 NONE -bpionly -e -v -loadfpga 
 exit
