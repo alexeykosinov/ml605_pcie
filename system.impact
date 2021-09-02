@@ -3,6 +3,6 @@ setcable -port auto
 identify -inferir
 identifympm
 attachflash -position 2 -bpi "XCF128X"
-assignfiletoattachedflash -position 2 -file "bootloader.mcs"
+assignfiletoattachedflash -position 2 -file "ml605/bootloader.mcs"
 program -p 2 -dataWidth 16 -rs1 NONE -rs0 NONE -bpionly -e -v -loadfpga 
 exit

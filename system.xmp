@@ -14,7 +14,7 @@ UserCmd2:
 UserCmd2Type: 0
 GenSimTB: 0
 SdkExportBmmBit: 1
-SdkExportDir: sdk/
+SdkExportDir: sdk
 InsertNoPads: 0
 WarnForEAArch: 1
 HdlLang: VHDL
@@ -22,10 +22,10 @@ SimModel: BEHAVIORAL
 ExternalMemSim: 0
 UcfFile: data/system.ucf
 EnableParTimingError: 0
-ShowLicenseDialog: 0
+ShowLicenseDialog: 1
 BInfo: 
-ICacheAddr: DDR3,C_S_AXI_BASEADDR
-DCacheAddr: DDR3,C_S_AXI_BASEADDR
-Processor: MB_Core
+ICacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
+DCacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
+Processor: microblaze_0
 ElfImp: 
 ElfSim: 
