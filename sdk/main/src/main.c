@@ -6,7 +6,7 @@
 #define AXIDMA_DEVICE_ID		XPAR_AXICDMA_0_DEVICE_ID
 
 XGpio GpioOutput;
-XAxiPcie XlnxEndPoint_0;
+
 
 
 void GPIO_Blinker(u8 GpioWidth);
@@ -21,28 +21,28 @@ int main() {
     //unsigned int cnt = 0;
 	int Status;
 
-	init_platform();
+    xil_printf("\n");
+    xil_printf("=============================================================\n");
+    xil_printf("= Configuration started =====================================\n");
+    xil_printf("=============================================================\n");
+    xil_printf("\n");
+
+	Status = init_platform();
+	if (Status != XST_SUCCESS) {
+		xil_printf("%c[1;31mFailed when initializing platform, code: %d%c[0m\n", 27, Status, 27);
+		return XST_FAILURE;
+	}
+    
+    xil_printf("\n");
+    xil_printf("=============================================================\n");
+    xil_printf("= Configuration ended =======================================\n");
+    xil_printf("=============================================================\n");
+    xil_printf("\n");
 
 	//xil_printf("%c[2J", 27); // Clear the screen
     xil_printf("%c[1;32mHello, Asshole!%c[0m\n", 27, 27); // in green color
-    xil_printf("Let's go!\n\r");
 
-	Status = PCIeEndPointInitialize(&XlnxEndPoint_0, AXIPCIE_DEVICE_ID);
-	if (Status != XST_SUCCESS) {
-		xil_printf("%c[1;31mError when initializing PCIe device, code: %d%c[0m\n", 27, Status, 27); // in red color
-		return XST_FAILURE;
-	}
 
-	CDMA_Init();
-	//CDMA_Transfer();
-
-	Status = DmaDataTransfer(AXIDMA_DEVICE_ID);
-	if (Status != XST_SUCCESS) {
-		xil_printf("%c[1;31mError when initializing CDMA, code: %d%c[0m\n", 27, Status, 27);
-		return XST_FAILURE;
-	}
-
-	xil_printf("Successfully ran PCIe End-Point CDMA Example\r\n");
 
     for (;;){
     	GPIO_Blinker(8);

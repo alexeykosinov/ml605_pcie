@@ -3,48 +3,29 @@
 #include "xil_cache.h"
 #include "xil_printf.h"
 #include "xaxicdma.h"
+#include "xaxipcie.h"
 #include "xtmrctr.h"
-#include <xuartlite_l.h>
-#include <xintc_l.h>
-
-#define UART_BASEADDR 		XPAR_RS232_UART_1_BASEADDR
-#define UART_INTERRUPT_MASK XPAR_RS232_UART_1_INTERRUPT_MASK
-#define UART_INTERRUPT_INTR	XPAR_MICROBLAZE_0_INTC_RS232_UART_1_INTERRUPT_INTR
-#define INTC_BASEADDR 		XPAR_INTC_0_BASEADDR
-
-
-#define UART_MAX_LENGTH_BUFFER 8
-#define LENGTH 128
-
-typedef volatile Xuint32 *U32Ptr;
-#define WR_WORD(ADDR, DATA) (*(U32Ptr)(ADDR) = (DATA))
-#define RD_WORD(ADDR, DATA) ((DATA) = *(U32Ptr)(ADDR))
+#include "xuartlite_l.h"
+#include "xintc_l.h"
 
 Xuint32 DataRead;
 
-#define SADDR0 	XPAR_PCI_EXPRESS_AXIBAR_HIGHADDR_0
-//#define SADDR0 	XPAR_PCI_EXPRESS_BASEADDR
-
-#define DADDR0 	XPAR_DDR3_SDRAM_S_AXI_BASEADDR + 0x00000100
-#define Length0 0xFFFF
-
-#define PCIE_CFG_ID_REG			0x0000		/* Vendor ID/Device ID offset */
-#define PCIE_CFG_CMD_STATUS_REG	0x0001		/* Command/Status Register offset */
-#define PCIE_CFG_CAH_LAT_HD_REG	0x0003		/* Cache Line / Latency Timer / Header Type / BIST Register Offset */
-#define PCIE_CFG_BAR_ZERO_REG	0x0004		/* Bar 0 offset */
-#define PCIE_CFG_CMD_BUSM_EN	0x00000004 	/* Bus master enable */
-
+static XAxiPcie XlnxPCIeEndPoint;
 static XAxiCdma CdmaInstance;
 static XTmrCtr p;
-
 
 volatile char Rx_byte;
 char Rx_data[UART_MAX_LENGTH_BUFFER];
 u8 Rx_indx = 0;
 
+int PCIe_Init(XAxiPcie *XlnxEndPointPtr);
+int CDMA_Init(XAxiCdma *CdmaInstance);
+int TestCDMA(XAxiCdma *CdmaInstance);
+int DmaDataTransfer(XAxiCdma *CdmaInstance);
 
 
 
+/* Функция обратного вызова UART */
 void uart_handler(void *baseaddr_p) {
 	while (!XUartLite_IsReceiveEmpty(UART_BASEADDR)) {
 
@@ -53,7 +34,14 @@ void uart_handler(void *baseaddr_p) {
 		if (Rx_byte == '\r'){
 
 			if (strncmp(Rx_data, "test", Rx_indx) == 0) {
+				int status;
 				xil_printf ("test cmd\n");
+				status = TestCDMA(&CdmaInstance);
+
+				if (status != XST_SUCCESS) {
+					xil_printf("Successfully ran PCIe End-Point CDMA Example\r\n");
+				}
+
 			}
 			else{
 				xil_printf ("Wrong command\n");
@@ -79,95 +67,109 @@ void disable_caches(){
     Xil_ICacheDisable();
 }
 
-void init_platform(){
-    enable_caches();
-	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
-	XIntc_MasterEnable(INTC_BASEADDR);
-	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
-	XUartLite_EnableIntr(UART_BASEADDR);
-}
-
 void cleanup_platform() {
     disable_caches();
 }
 
-int PCIeEndPointInitialize(XAxiPcie *XlnxEndPointPtr, u16 DeviceId) {
+int init_platform(){
+	int status;
+    enable_caches();
+
+    /* Конфигурация прерываний для UART */
+	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
+	XIntc_MasterEnable(INTC_BASEADDR);
+	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
+	XUartLite_EnableIntr(UART_BASEADDR);
+
+	/* Инициализация PCI Express */
+	status = PCIe_Init(&XlnxPCIeEndPoint);
+	if (status != XST_SUCCESS) {
+		xil_printf("%c[1;31mError when initializing PCIe device, code: %d%c[0m\n", 27, status, 27); // in red color
+		return XST_FAILURE;
+	}
+
+	/* Инициализация CDMA */
+	status = CDMA_Init(&CdmaInstance);
+	if (status != XST_SUCCESS){
+		xil_printf( "DMA peripheral configuration failed %d\n", status);
+		return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+}
+
+int PCIe_Init(XAxiPcie *XlnxEndPointPtr) {
 	int Status;
 	u32 HeaderData;
 	u8  BusNum;
 	u8  DeviceNum;
 	u8  FunctionNum;
 	u8  PortNumber;
-	u32 InterruptMask;
 	XAxiPcie_Config *ConfigPtr;
 
 	/* Initialization of the driver */
-	ConfigPtr = XAxiPcie_LookupConfig(DeviceId);
+	ConfigPtr = XAxiPcie_LookupConfig(0);
 	if (ConfigPtr == NULL) {
-		xil_printf("PCIe: \t Failed to initialize PCIe End Point Instance\r\n");
+		xil_printf("PCIe: \t Failed to initialize PCIe End Point Instance\n");
 		return XST_FAILURE;
 	}
 
 	Status = XAxiPcie_CfgInitialize(XlnxEndPointPtr, ConfigPtr, ConfigPtr->BaseAddress);
 	if (Status != XST_SUCCESS) {
-		xil_printf("PCIe: \t Failed to initialize PCIe End Point Instance\r\n");
+		xil_printf("PCIe: \t Failed to initialize PCIe End Point Instance\n");
 		return Status;
 	}
 
 	XAxiPcie_DisableInterrupts(XlnxEndPointPtr, XAXIPCIE_IM_ENABLE_ALL_MASK);		/* Disable all interrupts */
 	XAxiPcie_ClearPendingInterrupts(XlnxEndPointPtr, XAXIPCIE_ID_CLEAR_ALL_MASK);	/* Clear the pending interrupt */
 
-
 	/* Make sure link is up. */
 	Status = XAxiPcie_IsLinkUp(XlnxEndPointPtr);
 	if (Status != XST_SUCCESS) {
-		xil_printf("PCIe: \t Link is not up\r\n");
+		xil_printf("PCIe: \t Link is not up\n");
 		return XST_FAILURE;
 	}
 
-	xil_printf("PCIe: \t Link is up\r\n");
+	xil_printf("PCIe: \t Link is up\n");
 
 	/* See if root complex has already configured this end point. */
 	while(!(HeaderData & PCIE_CFG_CMD_BUSM_EN)){
 		XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, PCIE_CFG_CMD_STATUS_REG,&HeaderData);
 	}
 
-	xil_printf("PCIe: \t Root Complex has configured this end point\r\n");
-
+	xil_printf("PCIe: \t Root Complex has configured this end point\n");
 	XAxiPcie_GetRequesterId(XlnxEndPointPtr, &BusNum, &DeviceNum, &FunctionNum, &PortNumber);
+	xil_printf("PCIe: \t BDF number: %02X:%02X.%02X\n", BusNum, DeviceNum, FunctionNum);
 
-	xil_printf("PCIe: \t BDF number: %02X:%02X.%02X\r\n", BusNum, DeviceNum, FunctionNum);
-	//xil_printf("Port Number is %02X\r\n", PortNumber);
-
-	/* Read my configuration space */
+	/* Read configuration space */
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, PCIE_CFG_ID_REG, &HeaderData);
-	xil_printf("PCIe: \t Vendor ID/Device ID Register is %08X\r\n", HeaderData);
+	xil_printf("PCIe: \t Vendor ID/Device ID Register is %08X\n", HeaderData);
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, PCIE_CFG_CMD_STATUS_REG, &HeaderData);
-	xil_printf("PCIe: \t Command/Status Register is %08X\r\n", HeaderData);
+	xil_printf("PCIe: \t Command/Status Register is %08X\n", HeaderData);
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, PCIE_CFG_CAH_LAT_HD_REG, &HeaderData);
-	xil_printf("PCIe: \t Header Type/Latency Timer Register is %08X\r\n", HeaderData);
+	xil_printf("PCIe: \t Header Type/Latency Timer Register is %08X\n", HeaderData);
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, PCIE_CFG_BAR_ZERO_REG, &HeaderData);
-	xil_printf("PCIe: \t BAR 0 is %08X\r\n", HeaderData);
-
-
-	XAxiPcie_GetEnabledInterrupts(XlnxEndPointPtr, &InterruptMask);
-	xil_printf("Interrupts currently enabled are %8lX\r\n", InterruptMask);
-
-	XAxiPcie_GetPendingInterrupts(XlnxEndPointPtr, &InterruptMask);
-	xil_printf("Interrupts currently pending are %8lX\r\n", InterruptMask);
+	xil_printf("PCIe: \t BAR 0 is %08X\n", HeaderData);
 
 	return XST_SUCCESS;
 }
 
+int CDMA_Init(XAxiCdma *CdmaInstance) {
+	int status;
+	XAxiCdma_Config* ConfigPtr;
 
-int CDMA_Init(void) {
-	int Status;
-	XAxiCdma_Config* Cdma_Config = XAxiCdma_LookupConfig(XPAR_AXICDMA_0_DEVICE_ID);
-	Status = XAxiCdma_CfgInitialize( &CdmaInstance, Cdma_Config, XPAR_AXICDMA_0_BASEADDR);
-	if (Status != XST_SUCCESS){
-		xil_printf( "DMA peripheral configuration failed %d\n", Status);
+	ConfigPtr = XAxiCdma_LookupConfig(0);
+	if (ConfigPtr == NULL) {
+		xil_printf("CDMA: \t Configuration for CDMA not found\n");
+		return XST_FAILURE;
 	}
-	return Status;
+
+	status = XAxiCdma_CfgInitialize(CdmaInstance, ConfigPtr, ConfigPtr->BaseAddress);
+	if (status != XST_SUCCESS) {
+		xil_printf("CDMA: \t Failed to initialize CDMA Instance\n");
+		return XST_FAILURE;
+	}
+	return status;
 }
 
 void CDMA_Transfer() {
@@ -212,21 +214,17 @@ void CDMA_Transfer() {
 
 	if (Status != XST_SUCCESS)	xil_printf("DMA Transfer Error occurred: Status = %d\r\n", Status);
 
-
 	Xil_DCacheInvalidateRange((u32)txBufferAddr, LENGTH);
 
 	xil_printf("Transfer finished\r\n");
 	xil_printf("TxData: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[124], tx_buffer[125], tx_buffer[126], tx_buffer[127]);
 	xil_printf("RxData: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[124], rx_buffer[125], rx_buffer[126], rx_buffer[127]);
-
 }
 
 
-int DmaDataTransfer(u16 DeviceID) {
+int DmaDataTransfer(XAxiCdma *CdmaInstance) {
 
-	int Status;
 	volatile int Error;
-	XAxiCdma_Config *ConfigPtr;
 	Error = 0;
 
 	XTmrCtr *InstancePtr = &p;
@@ -237,19 +235,9 @@ int DmaDataTransfer(u16 DeviceID) {
 	if (SADDR0 == 0) return XST_FAILURE;
 	if (DADDR0 == 0) return XST_FAILURE;
 
-	ConfigPtr = XAxiCdma_LookupConfig(DeviceID);
-	if (ConfigPtr == NULL) {
-		return XST_FAILURE;
-	}
+	XAxiCdma_Reset(CdmaInstance);
 
-	Status = XAxiCdma_CfgInitialize(&CdmaInstance, ConfigPtr, ConfigPtr->BaseAddress);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	XAxiCdma_Reset(&CdmaInstance);
-
-	XAxiCdma_IntrDisable(&CdmaInstance, XAXICDMA_XR_IRQ_ALL_MASK);
+	XAxiCdma_IntrDisable(CdmaInstance, XAXICDMA_XR_IRQ_ALL_MASK);
 
 	// axi_timer
 	XTmrCtr_Initialize(InstancePtr, 0);
@@ -261,13 +249,13 @@ int DmaDataTransfer(u16 DeviceID) {
 	XTmrCtr_WriteReg(InstancePtr->BaseAddress, 0, XTC_TCSR_OFFSET, XTC_CSR_ENABLE_TMR_MASK);
 
 	//start transfer
-	XAxiCdma_SimpleTransfer(&CdmaInstance, SADDR0, DADDR0, Length0, 0, 0);
+	XAxiCdma_SimpleTransfer(CdmaInstance, SADDR0, DADDR0, Length0, 0, 0);
 
 	TimerCount1 = XTmrCtr_ReadReg(InstancePtr->BaseAddress, 0, XTC_TCR_OFFSET);
-	while (XAxiCdma_IsBusy(&CdmaInstance));
+	while (XAxiCdma_IsBusy(CdmaInstance));
 	TimerCount2 = XTmrCtr_ReadReg(InstancePtr->BaseAddress, 0, XTC_TCR_OFFSET);
 
-	Error = XAxiCdma_GetError(&CdmaInstance);
+	Error = XAxiCdma_GetError(CdmaInstance);
 	if (Error != 0x0) {
 		xil_printf("AXI CDMA Transfer Error =  %8.8x\r\n");
 		return XST_FAILURE;
@@ -290,4 +278,16 @@ int DmaDataTransfer(u16 DeviceID) {
 	return XST_SUCCESS;
 }
 
+
+int TestCDMA(XAxiCdma *CdmaInstance){
+
+	int Status;
+	Status = DmaDataTransfer(CdmaInstance);
+	if (Status != XST_SUCCESS) {
+		xil_printf("%c[1;31mError when initializing CDMA, code: %d%c[0m\n", 27, Status, 27);
+		return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+}
 
