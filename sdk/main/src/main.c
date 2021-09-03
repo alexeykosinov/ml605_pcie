@@ -18,7 +18,7 @@ void GPIO_Blinker(u8 GpioWidth);
 
 int main() {
 
-    unsigned int cnt = 0;
+    //unsigned int cnt = 0;
 	int Status;
 
 	init_platform();
@@ -46,10 +46,10 @@ int main() {
 
     for (;;){
     	GPIO_Blinker(8);
-        xil_printf("Bang! @ %c[1;33m%d%c[0m\n", 27, cnt, 27); // Yellow
-    	xil_printf("%c[2K", 27); // Clear current line
-    	xil_printf("%c[A", 27);  // Return position to the current line
-        cnt++;
+//      xil_printf("Bang! @ %c[1;33m%d%c[0m\n", 27, cnt, 27); // Yellow
+//    	xil_printf("%c[2K", 27); // Clear current line
+//    	xil_printf("%c[A", 27);  // Return position to the current line
+//      cnt++;
     }
 
     cleanup_platform();

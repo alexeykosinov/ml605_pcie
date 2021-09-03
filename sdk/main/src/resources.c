@@ -4,9 +4,17 @@
 #include "xil_printf.h"
 #include "xaxicdma.h"
 #include "xtmrctr.h"
+#include <xuartlite_l.h>
+#include <xintc_l.h>
 
+#define UART_BASEADDR 		XPAR_RS232_UART_1_BASEADDR
+#define UART_INTERRUPT_MASK XPAR_RS232_UART_1_INTERRUPT_MASK
+#define UART_INTERRUPT_INTR	XPAR_MICROBLAZE_0_INTC_RS232_UART_1_INTERRUPT_INTR
+#define INTC_BASEADDR 		XPAR_INTC_0_BASEADDR
+
+
+#define UART_MAX_LENGTH_BUFFER 8
 #define LENGTH 128
-
 
 typedef volatile Xuint32 *U32Ptr;
 #define WR_WORD(ADDR, DATA) (*(U32Ptr)(ADDR) = (DATA))
@@ -30,6 +38,37 @@ static XAxiCdma CdmaInstance;
 static XTmrCtr p;
 
 
+volatile char Rx_byte;
+char Rx_data[UART_MAX_LENGTH_BUFFER];
+u8 Rx_indx = 0;
+
+
+
+
+void uart_handler(void *baseaddr_p) {
+	while (!XUartLite_IsReceiveEmpty(UART_BASEADDR)) {
+
+		Rx_byte = XUartLite_RecvByte(UART_BASEADDR);
+
+		if (Rx_byte == '\r'){
+
+			if (strncmp(Rx_data, "test", Rx_indx) == 0) {
+				xil_printf ("test cmd\n");
+			}
+			else{
+				xil_printf ("Wrong command\n");
+			}
+
+			Rx_indx = 0;
+			Rx_data[0] = 0;
+
+		}
+		else{
+			Rx_data[Rx_indx++] = Rx_byte;
+		}
+	}
+}
+
 void enable_caches() {
     Xil_ICacheEnable();
     Xil_DCacheEnable();
@@ -42,6 +81,10 @@ void disable_caches(){
 
 void init_platform(){
     enable_caches();
+	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
+	XIntc_MasterEnable(INTC_BASEADDR);
+	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
+	XUartLite_EnableIntr(UART_BASEADDR);
 }
 
 void cleanup_platform() {
