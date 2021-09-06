@@ -18,14 +18,7 @@ void GPIO_Blinker(u8 GpioWidth);
 
 int main() {
 
-    //unsigned int cnt = 0;
 	int Status;
-
-    xil_printf("\n");
-    xil_printf("=============================================================\n");
-    xil_printf("= Configuration started =====================================\n");
-    xil_printf("=============================================================\n");
-    xil_printf("\n");
 
 	Status = init_platform();
 	if (Status != XST_SUCCESS) {
@@ -33,14 +26,13 @@ int main() {
 		return XST_FAILURE;
 	}
     
-    xil_printf("\n");
-    xil_printf("=============================================================\n");
-    xil_printf("= Configuration ended =======================================\n");
-    xil_printf("=============================================================\n");
-    xil_printf("\n");
+   xil_printf("\n");
+   xil_printf("%c[1;32m=============================================================%c[0m\n", 27, 27);
+   xil_printf("%c[1;32m= Configuration completed ===================================%c[0m\n", 27, 27);
+   xil_printf("%c[1;32m=============================================================%c[0m\n", 27, 27);
+   xil_printf("\n");
 
-	//xil_printf("%c[2J", 27); // Clear the screen
-    xil_printf("%c[1;32mHello, Asshole!%c[0m\n", 27, 27); // in green color
+   xil_printf("To run CDMA test: type 'test'\n");
 
 
 

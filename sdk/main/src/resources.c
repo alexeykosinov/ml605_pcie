@@ -24,7 +24,6 @@ int TestCDMA(XAxiCdma *CdmaInstance);
 int DmaDataTransfer(XAxiCdma *CdmaInstance);
 
 
-
 /* Функция обратного вызова UART */
 void uart_handler(void *baseaddr_p) {
 	while (!XUartLite_IsReceiveEmpty(UART_BASEADDR)) {
@@ -75,13 +74,11 @@ int init_platform(){
 	int status;
     enable_caches();
 
-    /* Конфигурация прерываний для UART */
-	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
-	XIntc_MasterEnable(INTC_BASEADDR);
-	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
-	XUartLite_EnableIntr(UART_BASEADDR);
-
-	/* Инициализация PCI Express */
+	/* Инициализация PCI Express
+	 * !ВАЖНО
+	 * Инициализация писюна должна быть одной из первых т.к.
+	 * на время конфигурации Root устройством ограничено (100 мс)
+	 * */
 	status = PCIe_Init(&XlnxPCIeEndPoint);
 	if (status != XST_SUCCESS) {
 		xil_printf("%c[1;31mError when initializing PCIe device, code: %d%c[0m\n", 27, status, 27); // in red color
@@ -94,6 +91,13 @@ int init_platform(){
 		xil_printf( "DMA peripheral configuration failed %d\n", status);
 		return XST_FAILURE;
 	}
+
+
+    /* Конфигурация прерываний для UART */
+	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
+	XIntc_MasterEnable(INTC_BASEADDR);
+	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
+	XUartLite_EnableIntr(UART_BASEADDR);
 
 	return XST_SUCCESS;
 }
@@ -129,8 +133,6 @@ int PCIe_Init(XAxiPcie *XlnxEndPointPtr) {
 		xil_printf("PCIe: \t Link is not up\n");
 		return XST_FAILURE;
 	}
-
-	xil_printf("PCIe: \t Link is up\n");
 
 	/* See if root complex has already configured this end point. */
 	while(!(HeaderData & PCIE_CFG_CMD_BUSM_EN)){
@@ -169,6 +171,10 @@ int CDMA_Init(XAxiCdma *CdmaInstance) {
 		xil_printf("CDMA: \t Failed to initialize CDMA Instance\n");
 		return XST_FAILURE;
 	}
+
+	XAxiCdma_Reset(CdmaInstance);
+	XAxiCdma_IntrDisable(CdmaInstance, XAXICDMA_XR_IRQ_ALL_MASK);
+
 	return status;
 }
 
@@ -199,9 +205,10 @@ void CDMA_Transfer() {
 	u32* txBufferAddr = (u32*)&tx_buffer[0];
 	u32* rxBufferAddr = (u32*)&rx_buffer[0];
 
+
 	xil_printf("Transfer prepared\r\n");
 	xil_printf("TxData: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", tx_buffer[0], tx_buffer[1], tx_buffer[2], tx_buffer[3], tx_buffer[124], tx_buffer[125], tx_buffer[126], tx_buffer[127]);
-	xil_printf("RxData: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[124], rx_buffer[125], rx_buffer[126], rx_buffer[127]);
+	// xil_printf("RxData: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", rx_buffer[0], rx_buffer[1], rx_buffer[2], rx_buffer[3], rx_buffer[124], rx_buffer[125], rx_buffer[126], rx_buffer[127]);
 
 	Xil_DCacheFlushRange((u32)rxBufferAddr, LENGTH);
 
@@ -224,20 +231,50 @@ void CDMA_Transfer() {
 
 int DmaDataTransfer(XAxiCdma *CdmaInstance) {
 
-	volatile int Error;
-	Error = 0;
+	int status;
+
 
 	XTmrCtr *InstancePtr = &p;
 
 	u32 TimerCount1 = 0;
 	u32 TimerCount2 = 0;
 
-	if (SADDR0 == 0) return XST_FAILURE;
-	if (DADDR0 == 0) return XST_FAILURE;
+	if (SADDR0 == 0) {
+		xil_printf("SADDR0 == 0\n");
+		return XST_FAILURE;
+	}
+	if (DADDR0 == 0) {
+		xil_printf("SADDR0 == 0\n");
+		return XST_FAILURE;
+	}
 
-	XAxiCdma_Reset(CdmaInstance);
+	//u32 cnt_array;
 
-	XAxiCdma_IntrDisable(CdmaInstance, XAXICDMA_XR_IRQ_ALL_MASK);
+//	u8* ddr_buffer = (u8*)DADDR0;
+//	u8* pcie_buffer = (u8*)SADDR0;
+
+//	ddr_buffer[0]   		= 0x1A;
+//	ddr_buffer[1]   		= 0x2B;
+//	ddr_buffer[2]   		= 0x3C;
+//	ddr_buffer[3]   		= 0x4D;
+//	ddr_buffer[Length0-3] 	= 0x99;
+//	ddr_buffer[Length0-2] 	= 0x55;
+//	ddr_buffer[Length0-1] 	= 0xAA;
+//	ddr_buffer[Length0] 	= 0x3F;
+
+	//u32* ddrBufferAddr = (u32*)&ddr_buffer[0];
+	//u32* pcieBufferAddr = (u32*)&pcie_buffer[0];
+	
+	// clear rx_buffer
+	//for(cnt_array = 0; cnt_array < Length0; cnt_array++) pcie_buffer[cnt_array] = 0;
+
+//	xil_printf("Transfer prepared\r\n");
+//	xil_printf("DDR Data: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", ddr_buffer[0], ddr_buffer[1], ddr_buffer[2], ddr_buffer[3], ddr_buffer[Length0-3], ddr_buffer[Length0-2], ddr_buffer[Length0-1], ddr_buffer[Length0]);
+	// xil_printf("PCIe Data: \t %02x %02x %02x %02x %02x %02x %02x %02x\r\n", pcie_buffer[0], pcie_buffer[1], pcie_buffer[2], pcie_buffer[3], pcie_buffer[Length0-3], pcie_buffer[Length0-2], pcie_buffer[Length0-1], pcie_buffer[Length0]);
+
+
+	//Xil_DCacheFlushRange((u32)ddrBufferAddr, Length0);
+
 
 	// axi_timer
 	XTmrCtr_Initialize(InstancePtr, 0);
@@ -249,17 +286,20 @@ int DmaDataTransfer(XAxiCdma *CdmaInstance) {
 	XTmrCtr_WriteReg(InstancePtr->BaseAddress, 0, XTC_TCSR_OFFSET, XTC_CSR_ENABLE_TMR_MASK);
 
 	//start transfer
-	XAxiCdma_SimpleTransfer(CdmaInstance, SADDR0, DADDR0, Length0, 0, 0);
+	status = XAxiCdma_SimpleTransfer(CdmaInstance, DADDR0, SADDR0, Length0, NULL, NULL);
+	if (status != XST_SUCCESS) {
+		status = XAxiCdma_GetError(CdmaInstance);
+		if (status != 0) {
+			xil_printf("Error Code = %x\n", status);
+			return XST_FAILURE;
+		}
+		xil_printf("AXI CDMA Simple Transfer Error\n");
+		return XST_FAILURE;
+	}
 
 	TimerCount1 = XTmrCtr_ReadReg(InstancePtr->BaseAddress, 0, XTC_TCR_OFFSET);
 	while (XAxiCdma_IsBusy(CdmaInstance));
 	TimerCount2 = XTmrCtr_ReadReg(InstancePtr->BaseAddress, 0, XTC_TCR_OFFSET);
-
-	Error = XAxiCdma_GetError(CdmaInstance);
-	if (Error != 0x0) {
-		xil_printf("AXI CDMA Transfer Error =  %8.8x\r\n");
-		return XST_FAILURE;
-	}
 
 	xil_printf("AXI CDMA Transfer is complete without errors\r\n");
 	xil_printf("-----------------------------------------------------\r\n");
@@ -268,12 +308,6 @@ int DmaDataTransfer(XAxiCdma *CdmaInstance) {
 	xil_printf(" - Speed 	= %d MByte/s\r\n", Length0*100/(TimerCount2-TimerCount1));
 	xil_printf("-----------------------------------------------------\r\n");
 
-	int i;
-	for(i = 0; i < 256; i+=4){
-
-		RD_WORD(DADDR0 + i, DataRead);
-		xil_printf("Data from DDR:  %8x\r\n", DataRead);
-	}
 
 	return XST_SUCCESS;
 }
@@ -290,4 +324,3 @@ int TestCDMA(XAxiCdma *CdmaInstance){
 
 	return XST_SUCCESS;
 }
-

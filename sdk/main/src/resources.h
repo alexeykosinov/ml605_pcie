@@ -15,9 +15,7 @@ typedef volatile Xuint32 *U32Ptr;
 #define WR_WORD(ADDR, DATA) (*(U32Ptr)(ADDR) = (DATA))
 #define RD_WORD(ADDR, DATA) ((DATA) = *(U32Ptr)(ADDR))
 
-#define SADDR0 	XPAR_PCI_EXPRESS_AXIBAR_HIGHADDR_0
-//#define SADDR0 	XPAR_PCI_EXPRESS_BASEADDR
-
+#define SADDR0 	XPAR_PCI_EXPRESS_PCIEBAR2AXIBAR_0
 #define DADDR0 	XPAR_DDR3_SDRAM_S_AXI_BASEADDR + 0x00000100
 #define Length0 0xFFFF
 
@@ -35,6 +33,7 @@ void cleanup_platform();
 int DmaDataTransfer(XAxiCdma *CdmaInstance);
 void CDMA_Transfer();
 
-// int DmaDataTransfer(u16 DeviceID);
-
 #endif
+
+
+

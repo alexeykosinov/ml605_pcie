@@ -1,6 +1,5 @@
 -g TdoPin:PULLNONE
--g StartUpClk:JTAGCLK
-#-g StartUpClk:CClk
+-g StartUpClk:CClk
 #-g UnusedPin:PullDown
 #-g ConfigRate:16
 #-g Compress
