@@ -1,0 +1,17 @@
+PROMGEN: Xilinx Prom Generator P.20131013
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+
+promgen -w -p mcs -c FF -o ml605//bootloader -x xcf128x -u 00000000 ml605/bootloader_cclktemp.bit -bpi_dc parallel -data_width 16 
+
+PROM ml605\bootloader.prm map: Tue Sep 07 12:24:10 2021
+
+Calculating PROM checksum with fill value ff
+
+Format        Mcs86 (32-bit)
+Size          16384K
+PROM start    0000:0000
+PROM end      00ff:ffff
+PROM checksum 765652c4
+
+        Addr1        Addr2                     Date File(s)
+    0000:0000    008c:e03b     Sep 07 12:24:06 2021 ml605/bootloader_cclktemp.bit

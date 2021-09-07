@@ -1,8 +1,34 @@
+setmode -pff
+setsubmode -pffbpi
+addconfigdevice -name "bootloader" -path "ml605"
+adddesign -version 0 -name "0"
+adddevicechain -index 0
+addpromdevice -p 1 -name xcf128x
+adddevice -p 1 -file "ml605/bootloader.bit"
+setattribute -configdevice -attr multibootBpiType -value ""
+setattribute -configdevice -attr compressed -value "FALSE"
+setattribute -configdevice -attr autoSize -value "FALSE"
+setattribute -configdevice -attr fileFormat -value "mcs"
+setattribute -configdevice -attr fillValue -value "FF"
+setattribute -configdevice -attr swapBit -value "FALSE"
+setattribute -configdevice -attr dir -value "UP"
+setattribute -configdevice -attr flashDataWidth -value "16"
+setattribute -configdevice -attr flashTopology -value "8"
+setattribute -configdevice -attr multiboot -value "FALSE"
+setattribute -configdevice -attr spiSelected -value "FALSE"
+setattribute -configdevice -attr multibootBpiType -value "TYPE_MB_BPI"
+setattribute -configdevice -attr multibootBpichainType -value "PARALLEL"
+setattribute -design -attr RSPinMsb -value ""
+setattribute -design -attr RSPin -value "00"
+setattribute -design -attr name -value "0"
+setattribute -design -attr RSPin -value "00"
+setattribute -design -attr endAddress -value "8ce03b"
+generate
 setmode -bs
 setcable -port auto
 identify -inferir
 identifympm
-attachflash -position 2 -bpi "XCF128X"
+attachflash -position 2 -bpi "xcf128x"
 assignfiletoattachedflash -position 2 -file "ml605/bootloader.mcs"
 program -p 2 -dataWidth 16 -rs1 NONE -rs0 NONE -bpionly -e -v -loadfpga 
 exit
