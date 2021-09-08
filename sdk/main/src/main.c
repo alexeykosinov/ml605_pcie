@@ -2,19 +2,9 @@
 #include "xgpio.h"
 #include "resources.h"
 
-#define AXIPCIE_DEVICE_ID 		XPAR_AXIPCIE_0_DEVICE_ID
-#define AXIDMA_DEVICE_ID		XPAR_AXICDMA_0_DEVICE_ID
-
 XGpio GpioOutput;
 
-
-
 void GPIO_Blinker(u8 GpioWidth);
-
-
-
-
-
 
 int main() {
 
@@ -32,7 +22,7 @@ int main() {
    xil_printf("%c[1;32m=============================================================%c[0m\n", 27, 27);
    xil_printf("\n");
 
-   xil_printf("To run CDMA test: type 'test'\n");
+   xil_printf("To run CDMA test type 'test'\n");
 
 
 
