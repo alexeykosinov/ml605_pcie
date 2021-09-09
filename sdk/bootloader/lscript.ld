@@ -19,7 +19,8 @@ MEMORY
 {
    microblaze_0_i_bram_ctrl_microblaze_0_d_bram_ctrl : ORIGIN = 0x00000050, LENGTH = 0x00003FB0
    linear_flash_S_AXI_MEM0_BASEADDR : ORIGIN = 0x42000000, LENGTH = 0x02000000
-   ddr3_sdram_S_AXI_BASEADDR : ORIGIN = 0xC0000000, LENGTH = 0x10000000
+   ddr3_sdram_S_AXI_BASEADDR : ORIGIN = 0x60000000, LENGTH = 0x10000000
+   axi_bram_ctrl_0_S_AXI_BASEADDR : ORIGIN = 0x81000000, LENGTH = 0x00008000
 }
 
 /* Specify the default entry point to the program */

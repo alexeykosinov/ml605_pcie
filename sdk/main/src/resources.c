@@ -7,22 +7,29 @@
 #include "xtmrctr.h"
 #include "xuartlite_l.h"
 #include "xintc_l.h"
+#include "xbram.h"
 
-
-#define SADDR0 	XPAR_PCI_EXPRESS_PCIEBAR2AXIBAR_0
-#define DADDR0 	XPAR_DDR3_SDRAM_S_AXI_BASEADDR + 0x00100000
+#define SADDR0 	XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
+#define DADDR0 	XPAR_DDR3_SDRAM_S_AXI_BASEADDR + 0x00000000
 #define Length0 0xFFFF
 
 static XAxiPcie XlnxPCIeEndPoint;
 static XAxiCdma CdmaInstance;
 static XTmrCtr p;
+static XBram BramInstance;
 
 volatile char Rx_byte;
 char Rx_data[UART_MAX_LENGTH_BUFFER];
 u8 Rx_indx = 0;
 
+u32 buff[512];
+
+
+
 int PCIe_Init(XAxiPcie *XlnxEndPointPtr);
 int CDMA_Init(XAxiCdma *CdmaInstance);
+int BRAM_Init(XBram *BramInstance);
+
 int CDMA_Test(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr);
 int CDMA_Transfer(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr, u32 TX, u32 RX, u16 Length);
 
@@ -89,12 +96,128 @@ int init_platform(){
 		return XST_FAILURE;
 	}
 
+	status = BRAM_Init(&BramInstance);
+	if (status != XST_SUCCESS){
+		xil_printf("%c[1;31m[ E ] BRAM is not working properly %c[0m\n", 27, 27);
+		return XST_FAILURE;
+	}
+
+
+
 
     /* Конфигурация прерываний для UART */
 	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
 	XIntc_MasterEnable(INTC_BASEADDR);
 	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
 	XUartLite_EnableIntr(UART_BASEADDR);
+
+
+
+
+
+
+
+
+
+
+
+
+	return XST_SUCCESS;
+}
+
+
+int BRAM_Init(XBram *BramInstance) {
+	// int status;
+	// XBram_Config *ConfigPtr;
+
+	// ConfigPtr = XBram_LookupConfig(0);
+	// if (ConfigPtr == (XBram_Config *) NULL) {
+	// 	return XST_FAILURE;
+	// }
+
+	// status = XBram_CfgInitialize(BramInstance, ConfigPtr, XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR);
+	// if (status != XST_SUCCESS) {
+	// 	return XST_FAILURE;
+	// }
+
+	// status = XBram_SelfTest(BramInstance, 0);
+	// if (status != XST_SUCCESS) {
+	// 	return XST_FAILURE;
+	// }
+
+
+
+	xil_printf("\n");
+//	u32 Addr;
+//	volatile u8 Data;
+
+
+	u8 *BufferPtr = (u8*)XPAR_BRAM_0_BASEADDR;
+
+
+
+	u32 cnt = 0;
+	u8 src[64];
+	 for (cnt = 0; cnt < sizeof cnt; cnt++) {
+		src[cnt]=0x55;
+	 }
+
+	cnt = 0;
+//    unsigned char dst[64];
+
+	memcpy(BufferPtr, &src , sizeof src);
+
+
+	 for (cnt = 0; cnt < sizeof src; cnt++) {
+		xil_printf("%d SRC Data: %02x\n", cnt, src[cnt]);
+		xil_printf("%d BRAM Data: %02x\n", cnt, BufferPtr[cnt]);
+	 }
+
+		// XBram_Out8(Addr, cnt);
+		// xil_printf("%08x BRAM RD Data: %02x\n", Addr, cnt);
+		// cnt++;
+	// }
+
+
+
+
+
+
+//	xil_printf("BRAM MEM ADDR BASE: %08x\n", ConfigPtr->MemBaseAddress);
+//	xil_printf("BRAM MEM ADDR HIGH: %08x\n", ConfigPtr->MemHighAddress - 0x7F00);
+//
+//	for (Addr = ConfigPtr->MemBaseAddress; Addr < (ConfigPtr->MemHighAddress - 0x7F00); Addr++) {
+//		XBram_Out8(Addr, cnt);
+//		xil_printf("%08x BRAM RD Data: %02x\n", Addr, cnt);
+//		cnt++;
+//	}
+//
+//
+//	for (Addr = ConfigPtr->MemBaseAddress; Addr < (ConfigPtr->MemHighAddress - 0x7F00); Addr++) {
+//		Data = XBram_In8(Addr);
+//		xil_printf("%08x BRAM RD Data: %02x\n", Addr, Data);
+//	}
+
+
+	xil_printf("BRAM Transfer is completed\n");
+	// cnt = XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR;
+	// u32 b_ct = 0;
+
+	// for (cnt = XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR; cnt < 256; cnt ++) {
+
+	// 	buff[b_ct] = XBram_In8(cnt);
+	// 	b_ct++;
+	// 	xil_printf("%d BRAM RD Data: %%04lx\n", b_ct, buff);
+	// }
+
+
+
+
+
+
+
+
+
 
 	return XST_SUCCESS;
 }
@@ -234,15 +357,6 @@ int CDMA_Transfer(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr, u32 TX, u32 RX, 
 	u32 TimerCount1 = 0;
 	u32 TimerCount2 = 0;
 
-	if (SADDR0 == 0) {
-		xil_printf("SADDR0 == 0\n");
-		return XST_FAILURE;
-	}
-	if (DADDR0 == 0) {
-		xil_printf("DADDR0 == 0\n");
-		return XST_FAILURE;
-	}
-
 	// axi_timer
 	XTmrCtr_Initialize(InstancePtr, 0);
 	Xil_AssertNonvoid(InstancePtr != NULL);
@@ -253,7 +367,7 @@ int CDMA_Transfer(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr, u32 TX, u32 RX, 
 	XTmrCtr_WriteReg(InstancePtr->BaseAddress, 0, XTC_TCSR_OFFSET, XTC_CSR_ENABLE_TMR_MASK);
 
 	//start transfer
-	status = XAxiCdma_SimpleTransfer(CdmaInstance, SADDR0, DADDR0, Length, NULL, NULL);
+	status = XAxiCdma_SimpleTransfer(CdmaInstance, TX, RX, Length, NULL, NULL);
 	if (status != XST_SUCCESS) {
 		status = XAxiCdma_GetError(CdmaInstance);
 		if (status != 0) {
@@ -278,7 +392,10 @@ int CDMA_Transfer(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr, u32 TX, u32 RX, 
 int CDMA_Test(XAxiCdma *CdmaInstance, XTmrCtr *InstancePtr){
 
 	int Status;
-	Status = CDMA_Transfer(CdmaInstance, InstancePtr, SADDR0, DADDR0, Length0);
+
+
+
+	Status = CDMA_Transfer(CdmaInstance, InstancePtr, (u32)buff, DADDR0, Length0);
 	if (Status != XST_SUCCESS) {
 		xil_printf("%c[1;31mError when initializing CDMA, code: %d%c[0m\n", 27, Status, 27);
 		return XST_FAILURE;

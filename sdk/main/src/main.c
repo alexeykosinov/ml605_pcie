@@ -17,9 +17,7 @@ int main() {
 	}
     
    xil_printf("\n");
-   xil_printf("%c[1;32m=============================================================%c[0m\n", 27, 27);
    xil_printf("%c[1;32m= Configuration completed ===================================%c[0m\n", 27, 27);
-   xil_printf("%c[1;32m=============================================================%c[0m\n", 27, 27);
    xil_printf("\n");
 
    xil_printf("To run CDMA test type 'test'\n");

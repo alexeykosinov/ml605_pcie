@@ -2,7 +2,7 @@
 # Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
 
 SOFTWARE_VERSION P.20131013
-DATE            09/08/2021 - 15:33
+DATE            09/08/2021 - 15:57
 SOURCE          ml605\bootloader.mcs
 DEVICE          16384K
 DATA_WIDTH      16
