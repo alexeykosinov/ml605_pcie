@@ -9,5 +9,4 @@ set TARGET_TYPE             "MICROBLAZE"
 set PROC_INSTANCE           "microblaze_0"
 set EXTRA_COMPILER_FLAGS    "-mxl-barrel-shift -mno-xl-soft-mul -mlittle-endian"
 set XMD_CONNECT             "connect mb mdm -debugdevice cpunr 1"
-set XILINX_PLATFORM_FLASH   1
 set ENDIANNESS              "LE"

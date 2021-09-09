@@ -1,4 +1,8 @@
 # Custom makefile
+MBGCC=D:\_files\Xilinx\14.7\ISE_DS\EDK\gnu\microblaze\nt\bin
+export PATH:=$(MBGCC);$(PATH)
+
+
 PRJ_NAME := bootloader
 LD_SRCS := lscript.ld
 LIBS := -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
