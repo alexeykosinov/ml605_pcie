@@ -20,9 +20,10 @@ int main() {
    xil_printf("%c[1;32m= Configuration completed ===================================%c[0m\n", 27, 27);
    xil_printf("\n");
 
-   xil_printf("To run CDMA test type 'test'\n");
-
-
+   xil_printf("Command palette:\n");
+   xil_printf("'rbram' - read bram data\n");
+   xil_printf("'wbram' - write bram data:\n");
+   xil_printf("\n");
 
     for (;;){
     	GPIO_Blinker(8);
