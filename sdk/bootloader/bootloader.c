@@ -45,7 +45,7 @@ int main() {
 #endif
 
     xil_printf("%cc\r\n", 27); // Reset terminal buffer
-    xil_printf("Loading SREC image from flash @ address: %x\n", FLASH_IMAGE_BASEADDR);
+    xil_printf("[ I ] Loading SREC image from flash @ address: %x\n", FLASH_IMAGE_BASEADDR);
 
     flbuf = (unsigned char*)FLASH_IMAGE_BASEADDR;
     ret = load_exec();

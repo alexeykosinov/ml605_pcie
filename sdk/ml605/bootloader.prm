@@ -3,7 +3,7 @@ Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
 
 promgen -w -p mcs -c FF -o ml605//bootloader -x xcf128x -u 00000000 ml605/bootloader.bit -bpi_dc parallel -data_width 16 
 
-PROM ml605\bootloader.prm map: Thu Sep 09 14:32:54 2021
+PROM ml605\bootloader.prm map: Thu Sep 16 16:11:26 2021
 
 Calculating PROM checksum with fill value ff
 
@@ -11,7 +11,7 @@ Format        Mcs86 (32-bit)
 Size          16384K
 PROM start    0000:0000
 PROM end      00ff:ffff
-PROM checksum 765bc5c0
+PROM checksum 765b1ff0
 
         Addr1        Addr2                     Date File(s)
-    0000:0000    008c:e03b     Sep 09 14:32:48 2021 ml605/bootloader.bit
+    0000:0000    008c:e03b     Sep 16 16:11:20 2021 ml605/bootloader.bit

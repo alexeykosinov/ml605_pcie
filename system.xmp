@@ -24,6 +24,20 @@ UcfFile: data/system.ucf
 EnableParTimingError: 0
 ShowLicenseDialog: 1
 BInfo: 
+LockAddr: RS232_Uart_1,C_BASEADDR
+LockAddr: axi_bram_ctrl_0,C_S_AXI_BASEADDR
+LockAddr: LEDs_8Bits,C_BASEADDR
+LockAddr: microblaze_0_i_bram_ctrl,C_BASEADDR
+LockAddr: microblaze_0_d_bram_ctrl,C_BASEADDR
+LockAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
+LockAddr: PCI_Express,C_AXIBAR_1
+LockAddr: PCI_Express,C_AXIBAR_0
+LockAddr: Linear_Flash,C_S_AXI_MEM0_BASEADDR
+LockAddr: axi_timer_0,C_BASEADDR
+LockAddr: debug_module,C_BASEADDR
+LockAddr: microblaze_0_intc,C_BASEADDR
+LockAddr: axi_cdma_0,C_BASEADDR
+LockAddr: PCI_Express,C_BASEADDR
 ICacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
 DCacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
 Processor: microblaze_0
