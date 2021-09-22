@@ -91,7 +91,6 @@ int PCIe_Init(XAxiPcie *XlnxEndPointPtr) {
 void PCIe_PrintInfo(XAxiPcie *XlnxEndPointPtr){
 	u32 HeaderData;
 
-	xil_printf("%cc\r\n", 27); // Reset terminal buffer if complete
 	xil_printf("[ I ] PCIe: Root Complex has configured this end point\n");
 	xil_printf("[ I ] PCIe: BDF number            - %02X:%02X.%02X\n", pcie_info.BusNum, pcie_info.DeviceNum, pcie_info.FunctionNum);
 	xil_printf("[ I ] PCIe: Vendor ID             - 0x%04X\n", pcie_info.VID);

@@ -138,6 +138,7 @@ int init_platform(){
 		xil_printf("%c[1;31m[ E ] PCIe: Device is not working properly %c[0m\n", 27, 27); // in red color
 		return XST_FAILURE;
 	}
+	xil_printf("%cc\r\n", 27); // Reset terminal buffer if complete
 	PCIe_PrintInfo(&pcieInst);
 	
 	/* Инициализация CDMA */
