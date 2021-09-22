@@ -37,6 +37,7 @@ LockAddr: axi_timer_0,C_BASEADDR
 LockAddr: debug_module,C_BASEADDR
 LockAddr: microblaze_0_intc,C_BASEADDR
 LockAddr: axi_cdma_0,C_BASEADDR
+LockAddr: axi_dma_0,C_BASEADDR
 LockAddr: PCI_Express,C_BASEADDR
 ICacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
 DCacheAddr: DDR3_SDRAM,C_S_AXI_BASEADDR
