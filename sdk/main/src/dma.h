@@ -28,7 +28,7 @@ typedef struct SGDesc {
 	u32 PADDING[3];			// выравнивание до 64 Б;
 } SGDesc;
 
-void DMA_PrintInfo(XAxiDma *DmaInstance);
+void DMA_PrintInfo();
 int DMA_Init(XAxiDma *DmaInstance);
 void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount);
 

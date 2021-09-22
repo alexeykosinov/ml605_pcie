@@ -95,6 +95,8 @@ void uart_handler(void *baseaddr_p) {
 			else if (strncmp(Rx_data, "rpci", Rx_indx) == 0) {
 				xil_printf (">> READ PCI Regs\n");
 				PCIe_PrintInfo(&pcieInst);
+				xil_printf ("\n");
+				DMA_PrintInfo();
 			}
 			else{
 				xil_printf ("Wrong command\n");
@@ -140,6 +142,7 @@ int init_platform(){
 	}
 	xil_printf("%cc\r\n", 27); // Reset terminal buffer if complete
 	PCIe_PrintInfo(&pcieInst);
+	xil_printf("\n");
 	
 	/* Инициализация CDMA */
 	status = DMA_Init(&dmaInst);
@@ -147,7 +150,8 @@ int init_platform(){
 		xil_printf("%c[1;31m[ E ] DMA: Peripheral is not working properly %c[0m\n", 27, 27);
 		return XST_FAILURE;
 	}
-	DMA_PrintInfo(&dmaInst);
+	DMA_PrintInfo();
+	xil_printf("\n");
 
     /* Конфигурация прерываний для UART */
 	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);

@@ -1,4 +1,5 @@
 #include "dma.h"
+#include "xaxidma_hw.h"
 
 int DMA_Init(XAxiDma *DmaInstance) {
 	int status;
@@ -25,16 +26,21 @@ int DMA_Init(XAxiDma *DmaInstance) {
 	return status;
 }
 
-void DMA_PrintInfo(XAxiDma *DmaInstance) {
-	xil_printf("[ I ] MM2S DMA Control Register        : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_MM2S_DMACR));
-	xil_printf("[ I ] MM2S DMA Status Register         : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_MM2S_DMASR));
-	xil_printf("[ I ] MM2S Current Descriptor Pointer  : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_MM2S_CURDESC));
-	xil_printf("[ I ] MM2S Tail Descriptor Pointer     : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_MM2S_TAILDESC));
-	xil_printf("[ I ] Scatter/Gather User and Cache    : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_SG_CTL));
-	xil_printf("[ I ] S2MM DMA Control Register        : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_S2MM_DMACR));
-	xil_printf("[ I ] S2MM DMA Status Register         : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_S2MM_DMASR));
-	xil_printf("[ I ] S2MM Current Descriptor Pointer  : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_S2MM_CURDESC));
-	xil_printf("[ I ] S2MM Tail Descriptor Pointer     : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_S2MM_TAILDESC));
+void DMA_PrintInfo() {
+	xil_printf("[ I ] DMA: MM2S / S2MM\n");
+	xil_printf("[ I ] Control Register            - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_MM2S_DMACR),
+																		Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_S2MM_DMACR));
+
+	xil_printf("[ I ] Status Register             - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_MM2S_DMASR),
+																		Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_S2MM_DMASR));
+
+	xil_printf("[ I ] Current Descriptor Pointer  - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_MM2S_CURDESC),
+																		Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_S2MM_CURDESC));
+
+	xil_printf("[ I ] Tail Descriptor Pointer     - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_MM2S_TAILDESC),
+																		Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_S2MM_TAILDESC));
+
+	xil_printf("[ I ] SG User and Cache           - 0x%08X\n", Xil_In32(XPAR_AXIDMA_0_BASEADDR + AXI_DMA_SG_CTL));
 }
 
 void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount){
