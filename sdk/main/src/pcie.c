@@ -93,73 +93,49 @@ void PCIe_PrintInfo(XAxiPcie *XlnxEndPointPtr){
 
 	xil_printf("%cc\r\n", 27); // Reset terminal buffer if complete
 	xil_printf("[ I ] PCIe: Root Complex has configured this end point\n");
-	xil_printf("[ I ] PCIe: BDF number          - %02X:%02X.%02X\n", pcie_info.BusNum, pcie_info.DeviceNum, pcie_info.FunctionNum);
-	xil_printf("[ I ] PCIe: Vendor ID           - 0x%04X\n", pcie_info.VID);
-	xil_printf("[ I ] PCIe: Device ID           - 0x%04X\n", pcie_info.PID);
+	xil_printf("[ I ] PCIe: BDF number            - %02X:%02X.%02X\n", pcie_info.BusNum, pcie_info.DeviceNum, pcie_info.FunctionNum);
+	xil_printf("[ I ] PCIe: Vendor ID             - 0x%04X\n", pcie_info.VID);
+	xil_printf("[ I ] PCIe: Device ID             - 0x%04X\n", pcie_info.PID);
 	// xil_printf("[ I ] PCIe: Command Register    - 0x%04X\n", pcie_info.Command);
-	xil_printf("[ I ] PCIe: Status Register     - 0x%04X\n", pcie_info.Status);
-	xil_printf("[ I ] PCIe: Revision ID         - 0x%02X\n", pcie_info.RevisonID);
-	xil_printf("[ I ] PCIe: Class Code          - 0x%06X\n", pcie_info.ClassCode);
-	xil_printf("[ I ] PCIe: Cash Line           - 0x%02X\n", pcie_info.CashLine);
-	xil_printf("[ I ] PCIe: Latency Timer       - 0x%02X\n", pcie_info.LatencyTimer);
-	xil_printf("[ I ] PCIe: Header Type         - 0x%02X\n", pcie_info.HeaderType);
-	xil_printf("[ I ] PCIe: BIST                - 0x%02X\n", pcie_info.BIST);
-	xil_printf("[ I ] PCIe: BAR0                - 0x%08X\n", pcie_info.Bar0);
-	xil_printf("[ I ] PCIe: BAR1                - 0x%08X\n", pcie_info.Bar1);
-	xil_printf("[ I ] PCIe: BAR2                - 0x%08X\n", pcie_info.Bar2);
-	xil_printf("[ I ] PCIe: BAR3                - 0x%08X\n", pcie_info.Bar3);
-	xil_printf("[ I ] PCIe: BAR4                - 0x%08X\n", pcie_info.Bar4);
-	xil_printf("[ I ] PCIe: BAR5                - 0x%08X\n", pcie_info.Bar5);
-	xil_printf("[ I ] PCIe: IRQ Line            - 0x%02X\n", pcie_info.IRQLine);
-	xil_printf("[ I ] PCIe: IRQ Pin             - 0x%02X\n", pcie_info.IRQPin);
-	xil_printf("[ I ] PCIe: Min Gnt             - 0x%02X\n", pcie_info.Min_Gnt);
-	xil_printf("[ I ] PCIe: Max Latency         - 0x%02X\n", pcie_info.Max_Lat);
+	xil_printf("[ I ] PCIe: Status Register       - 0x%04X\n", pcie_info.Status);
+	xil_printf("[ I ] PCIe: Revision ID           - 0x%02X\n", pcie_info.RevisonID);
+	xil_printf("[ I ] PCIe: Class Code            - 0x%06X\n", pcie_info.ClassCode);
+	xil_printf("[ I ] PCIe: Cash Line             - 0x%02X\n", pcie_info.CashLine);
+	xil_printf("[ I ] PCIe: Latency Timer         - 0x%02X\n", pcie_info.LatencyTimer);
+	xil_printf("[ I ] PCIe: Header Type           - 0x%02X\n", pcie_info.HeaderType);
+	xil_printf("[ I ] PCIe: BIST                  - 0x%02X\n", pcie_info.BIST);
+	xil_printf("[ I ] PCIe: BAR0                  - 0x%08X\n", pcie_info.Bar0);
+	xil_printf("[ I ] PCIe: BAR1                  - 0x%08X\n", pcie_info.Bar1);
+	xil_printf("[ I ] PCIe: BAR2                  - 0x%08X\n", pcie_info.Bar2);
+	xil_printf("[ I ] PCIe: BAR3                  - 0x%08X\n", pcie_info.Bar3);
+	xil_printf("[ I ] PCIe: BAR4                  - 0x%08X\n", pcie_info.Bar4);
+	xil_printf("[ I ] PCIe: BAR5                  - 0x%08X\n", pcie_info.Bar5);
+	xil_printf("[ I ] PCIe: IRQ Line              - 0x%02X\n", pcie_info.IRQLine);
+	xil_printf("[ I ] PCIe: IRQ Pin               - 0x%02X\n", pcie_info.IRQPin);
+	xil_printf("[ I ] PCIe: Min Gnt               - 0x%02X\n", pcie_info.Min_Gnt);
+	xil_printf("[ I ] PCIe: Max Latency           - 0x%02X\n", pcie_info.Max_Lat);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0051, &HeaderData);
-	xil_printf("[ I ] PCIe: PHY Status/Control        : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: PHY Status/Control    - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x004C, &HeaderData);
-	xil_printf("[ I ] PCIe: Bridge Info               : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: Bridge Info           - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x004D, &HeaderData);
-	xil_printf("[ I ] PCIe: Bridge Status and Control : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: Bridge Status/Control - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x004E, &HeaderData);
-	xil_printf("[ I ] PCIe: Interrupt Decode          : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: Interrupt Decode      - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x004F, &HeaderData);
-	xil_printf("[ I ] PCIe: Interrupt Mask            : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: Interrupt Mask        - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0050, &HeaderData);
-	xil_printf("[ I ] PCIe: Bus Location              : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: Bus Location          - 0x%08X\n", HeaderData);
 
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0082, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_0U         : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_0U     - 0x%08X\n", HeaderData);
+	
 	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0083, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_0L         : 0x%08X\n", HeaderData);
-
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0084, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_1U         : 0x%08X\n", HeaderData);
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0085, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_1L         : 0x%08X\n", HeaderData);
-
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0086, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_2U         : 0x%08X\n", HeaderData);
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0087, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_2L         : 0x%08X\n", HeaderData);
-
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0088, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_3U         : 0x%08X\n", HeaderData);
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x0089, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_3L         : 0x%08X\n", HeaderData);
-
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x008A, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_4U         : 0x%08X\n", HeaderData);
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x008B, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_4L         : 0x%08X\n", HeaderData);
-
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x008C, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_5U         : 0x%08X\n", HeaderData);
-	XAxiPcie_ReadLocalConfigSpace(XlnxEndPointPtr, 0x008D, &HeaderData);
-	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_5L         : 0x%08X\n", HeaderData);
+	xil_printf("[ I ] PCIe: AXIBAR2PCIEBAR_0L     - 0x%08X\n", HeaderData);
 }

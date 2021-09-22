@@ -17,7 +17,7 @@ int DMA_Init(XAxiDma *DmaInstance) {
 	}
 
 	/* Scatter-Gather is enable? */
-	if (!XAxicDma_HasSg(DmaInstance)) {
+	if (!XAxiDma_HasSg(DmaInstance)) {
 		xil_printf("[ E ] DMA: Device configured as Simple Mode\n");
 		return XST_FAILURE;
 	}
@@ -37,7 +37,7 @@ void DMA_PrintInfo(XAxiDma *DmaInstance) {
 	xil_printf("[ I ] S2MM Tail Descriptor Pointer     : 0x%08X\n", Xil_In32(DmaInstance + AXI_DMA_S2MM_TAILDESC));
 }
 
-void DMA_SG_Test(u32 *TxBuffer, u32 *RxBuffer, u16 BufferSize, u16 DescCount){
+void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount){
 
 	SGDesc RxDesc[DescCount];
 	SGDesc TxDesc[DescCount];
@@ -61,21 +61,21 @@ void DMA_SG_Test(u32 *TxBuffer, u32 *RxBuffer, u16 BufferSize, u16 DescCount){
 		TxDesc[i].NXTDESC_MSB = 0x0;
 		TxDesc[i].BUFFER_ADDRESS = (u32)&TxBuffer[i][0];
 		TxDesc[i].BUFFER_ADDRESS_MSB = 0x0;
-		TxDesc[i].RESERVED0 = 0x0;
-		TxDesc[i].RESERVED1 = 0x0;
+		TxDesc[i].RESERVED[0] = 0x0;
+		TxDesc[i].RESERVED[1] = 0x0;
 		TxDesc[i].CONTROL = 0xC000000 + sizeof(TxBuffer[i]);
 		TxDesc[i].STATUS = 0x0;
-		TxDesc[i].APP0 = 0x0;
-		TxDesc[i].APP1 = 0x0;
-		TxDesc[i].APP2 = 0x0;
-		TxDesc[i].APP3 = 0x0;
-		TxDesc[i].APP4 = 0x0;
+		TxDesc[i].APP[0] = 0x0;
+		TxDesc[i].APP[1] = 0x0;
+		TxDesc[i].APP[2] = 0x0;
+		TxDesc[i].APP[3] = 0x0;
+		TxDesc[i].APP[4] = 0x0;
 	}
 
 	/* Скопируем дескрипторы передачи в память дескрипторов, которая расположена в программируемой логике */
 	DescAddr = 0x40C08000;
 	for (i = 0; i < DescCount; i++) {
-		memcpy((u32 *)DescAddr, TxBuffer, sizeof(TxBuffer)*BUF_LENGTH);
+		memcpy((u32 *)DescAddr, TxBuffer, sizeof(TxBuffer)*64);
 		DescAddr += 0x40;
 	}
 
@@ -94,15 +94,15 @@ void DMA_SG_Test(u32 *TxBuffer, u32 *RxBuffer, u16 BufferSize, u16 DescCount){
 		RxDesc[i].NXTDESC_MSB = 0x0;
 		RxDesc[i].BUFFER_ADDRESS = (u32)&RxBuffer[i][0];
 		RxDesc[i].BUFFER_ADDRESS_MSB = 0x0;
-		RxDesc[i].RESERVED0 = 0x0;
-		RxDesc[i].RESERVED1 = 0x0;
+		RxDesc[i].RESERVED[0] = 0x0;
+		RxDesc[i].RESERVED[1] = 0x0;
 		RxDesc[i].CONTROL = sizeof(RxBuffer[i]);
 		RxDesc[i].STATUS = 0x0;
-		RxDesc[i].APP0 = 0x0;
-		RxDesc[i].APP1 = 0x0;
-		RxDesc[i].APP2 = 0x0;
-		RxDesc[i].APP3 = 0x0;
-		RxDesc[i].APP4 = 0x0;
+		RxDesc[i].APP[0] = 0x0;
+		RxDesc[i].APP[1] = 0x0;
+		RxDesc[i].APP[2] = 0x0;
+		RxDesc[i].APP[3] = 0x0;
+		RxDesc[i].APP[4] = 0x0;
 	}
 
 	/** Copy receive descriptor for memory of descriptors */

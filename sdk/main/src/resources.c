@@ -19,7 +19,7 @@
 #define BUF_LENGTH 	64
 
 static XAxiPcie pcieInst;
-static XAxiCdma dmaInst;
+static XAxiDma dmaInst;
 static XTmrCtr xtmrInst;
 
 volatile char Rx_byte;
@@ -27,7 +27,7 @@ char Rx_data[UART_MAX_LENGTH_BUFFER];
 u8 Rx_indx = 0;
 
 u32 *BramPtr = (u32*)XPAR_BRAM_0_BASEADDR;
-u32 *CdmaPtr = (u32*)XPAR_AXICDMA_0_BASEADDR;
+u32 *DmaPtr = (u32*)XPAR_AXIDMA_0_BASEADDR;
 u32 *PciePtr = (u32*)XPAR_AXIPCIE_0_BASEADDR;
 
 u32 BRAM_RX_Buff[BUF_LENGTH];
@@ -91,11 +91,10 @@ void uart_handler(void *baseaddr_p) {
 					// cnt++;				
 				// }
 
-				CDMA_Transfer(&cdmaInst, &xtmrInst, SADDR0, DADDR0, 256);
 			}
 			else if (strncmp(Rx_data, "rpci", Rx_indx) == 0) {
 				xil_printf (">> READ PCI Regs\n");
-				PCIe_Print_Reg(&pcieInst);
+				PCIe_PrintInfo(&pcieInst);
 			}
 			else{
 				xil_printf ("Wrong command\n");
@@ -139,7 +138,6 @@ int init_platform(){
 		xil_printf("%c[1;31m[ E ] PCIe: Device is not working properly %c[0m\n", 27, 27); // in red color
 		return XST_FAILURE;
 	}
-
 	PCIe_PrintInfo(&pcieInst);
 	
 	/* Инициализация CDMA */
@@ -148,6 +146,7 @@ int init_platform(){
 		xil_printf("%c[1;31m[ E ] DMA: Peripheral is not working properly %c[0m\n", 27, 27);
 		return XST_FAILURE;
 	}
+	DMA_PrintInfo(&dmaInst);
 
     /* Конфигурация прерываний для UART */
 	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
