@@ -26,9 +26,10 @@ volatile char Rx_byte;
 char Rx_data[UART_MAX_LENGTH_BUFFER];
 u8 Rx_indx = 0;
 
-u32 *BramPtr = (u32*)XPAR_BRAM_0_BASEADDR;
-u32 *DmaPtr = (u32*)XPAR_AXIDMA_0_BASEADDR;
-u32 *PciePtr = (u32*)XPAR_AXIPCIE_0_BASEADDR;
+u32 *BramPtr 	= (u32 *) XPAR_BRAM_0_BASEADDR;
+u32 *DmaPtr 	= (u32 *) XPAR_AXIDMA_0_BASEADDR;
+u32 *PciePtr 	= (u32 *) XPAR_AXIPCIE_0_BASEADDR;
+u32 *AxiBarPtr	= (u32 *) XPAR_AXIPCIE_0_AXIBAR_0;
 
 u32 BRAM_RX_Buff[BUF_LENGTH];
 u32 BRAM_TX_Buff[BUF_LENGTH];
@@ -75,8 +76,9 @@ void uart_handler(void *baseaddr_p) {
 				}
 				xil_printf ("\n");
 			}
-			else if (strncmp(Rx_data, "wddr", Rx_indx) == 0) {
-				xil_printf (">> WRITE DDR\n");
+			else if (strncmp(Rx_data, "scan", Rx_indx) == 0) {
+				xil_printf (">> WRITE scan\n");
+				ScanAXIBAR(0xDEADBEEF);
 				// u32 cnt = 0;
 				// MyAdr = 0;
 				// for(i = 0; i < BUF_LENGTH; i++){
@@ -97,6 +99,14 @@ void uart_handler(void *baseaddr_p) {
 				PCIe_PrintInfo(&pcieInst);
 				xil_printf ("\n");
 				DMA_PrintInfo();
+				// WrAXIBAR(0xBABEBEEF, 65);
+				// WrAXIBAR(0xBABEBEEF, 91);
+				// WrAXIBAR(0xBABEBEEF, 150);
+				// WrAXIBAR(0xBABEBEEF, 215);
+			}
+			else if (strncmp(Rx_data, "wrbar", Rx_indx) == 0) {
+				xil_printf (">> WRITE BAR\n");
+				WrAXIBAR(0xAA55AA55);
 			}
 			else{
 				xil_printf ("Wrong command\n");
@@ -160,4 +170,31 @@ int init_platform(){
 	XUartLite_EnableIntr(UART_BASEADDR);
 
 	return XST_SUCCESS;
+}
+
+
+void ScanAXIBAR(u32 Word) {
+	int i;
+	u32 temp;
+	u32 cnt_words;
+
+	for(i = 0; i < 256; i+=4){
+		temp = Xil_In32(XPAR_AXIPCIE_0_AXIBAR_0 + i);
+		if (temp == Word){
+			xil_printf("[ I ] SCAN AXI BAR Found a word 0x%08X at 0x%08X\n", temp, XPAR_AXIPCIE_0_AXIBAR_0 + i);
+			cnt_words++;
+		}
+		else if (temp != 0){
+			xil_printf("[ I ] SCAN AXI BAR Found a word 0x%08X at 0x%08X\n", temp, XPAR_AXIPCIE_0_AXIBAR_0 + i);
+		}
+	}
+	xil_printf("[ I ] SCAN AXI BAR counting done, found num of words: %d\n", cnt_words);
+}
+
+void WrAXIBAR(u32 word) {
+	int i;
+	for(i = 0; i < 256; i+=4){
+		Xil_Out32(XPAR_AXIPCIE_0_AXIBAR_0 + i, word);
+	}
+	xil_printf("[ I ] WRITE AXI BAR done\n");
 }
