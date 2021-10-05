@@ -100,7 +100,7 @@ NET "PCIe_perstn" LOC = AE13 | IOSTANDARD = LVCMOS25 | PULLUP | NODELAY ;
 # (UG) for guidelines regarding clock resource selection.
 #
 
-INST "*/PCIe_Diff_Clk_I/USE_IBUFDS_GTXE1.GEN_IBUFDS_GTXE1[0].IBUFDS_GTXE1_I" LOC = IBUFDS_GTXE1_X0Y6;
+INST "*/axi_pcie_diff_clk/USE_IBUFDS_GTXE1.GEN_IBUFDS_GTXE1[0].IBUFDS_GTXE1_I" LOC = IBUFDS_GTXE1_X0Y6;
 
 #
 # Transceiver instance placement.  This constraint selects the

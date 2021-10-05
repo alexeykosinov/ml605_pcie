@@ -8,7 +8,7 @@
 #include "xio.h"
 #endif
 
-#define FLASH_BASEADDR          XPAR_LINEAR_FLASH_S_AXI_MEM0_BASEADDR
+#define FLASH_BASEADDR          XPAR_EMC_0_S_AXI_MEM0_BASEADDR
 #define FLASH_IMAGE_BASEADDR  	(FLASH_BASEADDR + 0x00F00000)
 #define SREC_MAX_BYTES          255  /* Maximum record length */
 #define SREC_DATA_MAX_BYTES     123  /* Maximum of 123 data bytes */
