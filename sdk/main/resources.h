@@ -16,6 +16,8 @@ typedef volatile u32 *U32Ptr;
 
 int init_platform();
 void cleanup_platform();
+void ScanAXIBAR(u32 Word, u32 AXIBAR);
+void WrAXIBAR(u32 word);
 
 #endif
 
