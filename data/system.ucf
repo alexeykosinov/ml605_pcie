@@ -1,6 +1,3 @@
-#
-# pin constraints
-#
 NET CLK_N LOC = "H9"  |  DIFF_TERM = "TRUE"  |  IOSTANDARD = "LVDS_25";
 NET CLK_P LOC = "J9"  |  DIFF_TERM = "TRUE"  |  IOSTANDARD = "LVDS_25";
 NET LEDs_8Bits_TRI_O[0] LOC = "AC22"  |  IOSTANDARD = "LVCMOS25";

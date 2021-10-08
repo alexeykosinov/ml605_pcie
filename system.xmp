@@ -26,13 +26,12 @@ ShowLicenseDialog: 1
 BInfo: 
 LockAddr: microblaze_0_i_bram_ctrl,C_BASEADDR
 LockAddr: microblaze_0_d_bram_ctrl,C_BASEADDR
-LockAddr: axi_pcie_0,C_AXIBAR_1
-LockAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 LockAddr: xcf128x,C_S_AXI_MEM0_BASEADDR
-LockAddr: microblaze_0_ctl_mailbox,C_S_AXI_BASEADDR
+LockAddr: PCI_Express,C_BASEADDR
+LockAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
+LockAddr: PCI_Express,C_BASEADDR
 LockAddr: axi_cdma_0,C_BASEADDR
-LockAddr: axi_pcie_0,C_BASEADDR
-LockAddr: axi_pcie_0,C_AXIBAR_0
+LockAddr: PCI_Express,C_AXIBAR_0
 ICacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 DCacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 Processor: microblaze_0

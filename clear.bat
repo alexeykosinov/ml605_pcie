@@ -5,5 +5,4 @@ rm *.opt
 rd /S /Q __xps
 rd /S /Q hdl
 rd /S /Q implementation
-rd /S /Q pcores
 rd /S /Q synthesis

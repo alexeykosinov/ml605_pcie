@@ -3,12 +3,14 @@
 #include "resources.h"
 #include "xparameters.h"
 #include "xil_cache.h"
+#include "xil_io.h"
 #include "xil_printf.h"
 #include "xaxicdma.h"
 #include "xaxipcie.h"
 #include "xtmrctr.h"
 #include "xuartlite_l.h"
 #include "xintc_l.h"
+#include "xgpio.h"
 
 #include "pcie.h"
 #include "dma.h"
@@ -20,7 +22,8 @@
 
 static XAxiPcie pcieInst;
 static XAxiCdma cdmaInst;
-static XTmrCtr xtmrInst;
+//static XTmrCtr xtmrInst;
+static XGpio GpioOutput;
 
 volatile char Rx_byte;
 char Rx_data[UART_MAX_LENGTH_BUFFER];
@@ -30,6 +33,7 @@ u32 *BramPtr 	= (u32 *) XPAR_BRAM_0_BASEADDR;
 u32 *CdmaPtr 	= (u32 *) XPAR_AXICDMA_0_BASEADDR;
 u32 *PciePtr 	= (u32 *) XPAR_AXIPCIE_0_BASEADDR;
 u32 *AxiBarPtr	= (u32 *) XPAR_AXIPCIE_0_AXIBAR_0;
+u32 *DdrPtr		= (u32 *) XPAR_V6DDR_0_S_AXI_BASEADDR;
 
 u32 BRAM_RX_Buff[BUF_LENGTH];
 u32 BRAM_TX_Buff[BUF_LENGTH];
@@ -42,59 +46,15 @@ void uart_handler(void *baseaddr_p) {
 
 	u32 i;
 
-	u32 MyAdr;
-	u32 StartAdr = DADDR0;
-
-
 	while (!XUartLite_IsReceiveEmpty(UART_BASEADDR)) {
 		Rx_byte = XUartLite_RecvByte(UART_BASEADDR);
 		if (Rx_byte == '\r'){
-			if (strncmp(Rx_data, "rbram", Rx_indx) == 0) {
-				xil_printf (">> BRAM READ\n");
-				for (i = 0; i < BUF_LENGTH; i++) {
-					BRAM_RX_Buff[i] = BramPtr[i];
-					xil_printf(">> BRAM [ADDRESS: %08x] [DATA: %08x]\n", &BramPtr[i], BRAM_RX_Buff[i]);
-				}
-				xil_printf ("\n");
-			}
-			else if (strncmp(Rx_data, "wbram", Rx_indx) == 0) {
-				xil_printf (">> BRAM WRITE\n");
-				for(i = 0; i < BUF_LENGTH; i++){
-					BRAM_TX_Buff[i] = i;
-				}
-				memcpy(BramPtr, BRAM_TX_Buff, sizeof(BRAM_TX_Buff)*BUF_LENGTH);
-			}
-			else if (strncmp(Rx_data, "rddr", Rx_indx) == 0) {
-				xil_printf (">> READ DDR\n");
-				// u32 cnt = 0;
-				// MyAdr = 0;
-				for (MyAdr = StartAdr; MyAdr < StartAdr + sizeof(u32)*BUF_LENGTH; MyAdr += 4) {
-					// RD_WORD(MyAdr, DDR_TX_Buf[cnt]);
-					// DDR_TX_Buf[cnt] = Xil_In32(MyAdr);
-					xil_printf(">> DDR [ADDRESS: 0x%08x] [DATA: 0x%08x]\n", MyAdr, Xil_In32(MyAdr));
-					// cnt++;
-				}
-				xil_printf ("\n");
+			if (strncmp(Rx_data, "b", Rx_indx) == 0) {
+				xil_printf (">> ERROR\n");
 			}
 			else if (strncmp(Rx_data, "scan", Rx_indx) == 0) {
 				xil_printf (">> WRITE scan\n");
 				ScanAXIBAR(0xDEADBEEF, XPAR_AXIPCIE_0_AXIBAR_0);
-
-				ScanAXIBAR(0xDEADBEEF, XPAR_AXIPCIE_0_AXIBAR_1);
-
-				// u32 cnt = 0;
-				// MyAdr = 0;
-				// for(i = 0; i < BUF_LENGTH; i++){
-				// 	DDR_TX_Buf[i] = i*2;
-				// }
-				// for (MyAdr = StartAdr; MyAdr < StartAdr + sizeof(u32)*BUF_LENGTH; MyAdr += 4) {
-					// WR_WORD(MyAdr, DDR_TX_Buf[cnt]);
-					// Xil_Out32(MyAdr, DDR_TX_Buf[cnt]);
-					// Xil_Out32(MyAdr, 0xAAAAAAAA);
-					// xil_printf(">> DDR Reading:\n");
-					// xil_printf(">> DDR [DATA: 0x%08x]\n", Xil_In32(MyAdr));
-					// cnt++;				
-				// }
 
 			}
 			else if (strncmp(Rx_data, "rpci", Rx_indx) == 0) {
@@ -107,8 +67,10 @@ void uart_handler(void *baseaddr_p) {
 				xil_printf (">> WRITE BAR\n");
 				WrAXIBAR(0xAA55AA55);
 			}
-			else if (strncmp(Rx_data, "reset", Rx_indx) == 0) {
-				xil_printf (">> WRITE RESET\n");
+			else if (strncmp(Rx_data, "rddr", Rx_indx) == 0) {
+				for (i = 0; i < 128; i++){
+					xil_printf (">> %d DDR DATA: 0x%08X\n", i, DdrPtr[i]);
+				}
 			}
 			else{
 				xil_printf ("Wrong command\n");
@@ -135,6 +97,32 @@ void disable_caches(){
 
 void cleanup_platform() {
     disable_caches();
+}
+
+
+void led_blinker(u8 GpioWidth) {
+
+  u8 LedBit;
+  u8 LedLoop;
+  unsigned int i;
+  int numTimes = 1;
+
+  XGpio_Initialize(&GpioOutput, 0);				// Initialization
+  XGpio_SetDataDirection(&GpioOutput, 1, 0x0); 	// Set the direction for all signals to be outputs
+  XGpio_DiscreteWrite(&GpioOutput, 1, 0x0); 	// Set the GPIO outputs to low
+
+  while (numTimes > 0) {
+      for (LedBit = 0x0; LedBit < GpioWidth; LedBit++) {
+          for (LedLoop = 0; LedLoop < 1; LedLoop++) {
+			XGpio_DiscreteWrite(&GpioOutput, 1, 1 << LedBit); // Set the GPIO Output to High
+			for(i = 0; i < 0x00F0000; i++){}
+
+            XGpio_DiscreteClear(&GpioOutput, 1, 1 << LedBit); //  Clear the GPIO Output
+            for(i = 0; i < 0x00F0000; i++){}
+          }
+      }
+      numTimes--;
+  }
 }
 
 int init_platform(){
@@ -178,7 +166,7 @@ int init_platform(){
 void ScanAXIBAR(u32 Word, u32 AXIBAR) {
 	int i;
 	u32 temp;
-	u32 cnt_words;
+//	u32 cnt_words;
 
 	// for(i = 0; i < 16384; i+=4){
 	// 	temp = Xil_In32(XPAR_AXIPCIE_0_AXIBAR_0 + i);
@@ -198,7 +186,7 @@ void ScanAXIBAR(u32 Word, u32 AXIBAR) {
 //			xil_printf("[ I ] SCAN AXI BAR Found a word 0x%08X at 0x%08X\n", temp, AXIBAR + i);
 //		}
 	}
-	xil_printf("[ I ] SCAN AXI BAR counting done, found num of words: %d\n", cnt_words);
+//	xil_printf("[ I ] SCAN AXI BAR counting done, found num of words: %d\n", cnt_words);
 }
 
 void WrAXIBAR(u32 word) {

@@ -2,9 +2,7 @@
 #include "xgpio.h"
 #include "resources.h"
 
-XGpio GpioOutput;
 
-void GPIO_Blinker(u8 GpioWidth);
 
 int main() {
 
@@ -28,7 +26,7 @@ int main() {
     xil_printf("\n");
 
     for (;;){
-    	GPIO_Blinker(8);
+    	led_blinker(4);
 //      xil_printf("Bang! @ %c[1;33m%d%c[0m\n", 27, cnt, 27); // Yellow
 //    	xil_printf("%c[2K", 27); // Clear current line
 //    	xil_printf("%c[A", 27);  // Return position to the current line
@@ -44,27 +42,3 @@ int main() {
 
 
 
-void GPIO_Blinker(u8 GpioWidth) {
-
-  u8 LedBit;
-  u8 LedLoop;
-  unsigned int i;
-  int numTimes = 1;
-
-  XGpio_Initialize(&GpioOutput, 0);				// Initialization
-  XGpio_SetDataDirection(&GpioOutput, 1, 0x0); 	// Set the direction for all signals to be outputs
-  XGpio_DiscreteWrite(&GpioOutput, 1, 0x0); 	// Set the GPIO outputs to low
-
-  while (numTimes > 0) {
-      for (LedBit = 0x0; LedBit < GpioWidth; LedBit++) {
-          for (LedLoop = 0; LedLoop < 1; LedLoop++) {
-			XGpio_DiscreteWrite(&GpioOutput, 1, 1 << LedBit); // Set the GPIO Output to High
-			for(i = 0; i < 0x00F0000; i++){}
-
-            XGpio_DiscreteClear(&GpioOutput, 1, 1 << LedBit); //  Clear the GPIO Output
-            for(i = 0; i < 0x00F0000; i++){}
-          }
-      }
-      numTimes--;
-  }
-}

@@ -1,6 +1,2 @@
 -g TdoPin:PULLNONE
 -g StartUpClk:CClk
-#-g UnusedPin:PullDown
-#-g ConfigRate:16
-#-g Compress
-#-bd ..\sdk\bootloader\Debug\bootloader.elf
