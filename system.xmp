@@ -30,7 +30,6 @@ LockAddr: xcf128x,C_S_AXI_MEM0_BASEADDR
 LockAddr: PCI_Express,C_BASEADDR
 LockAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 LockAddr: PCI_Express,C_BASEADDR
-LockAddr: axi_cdma_0,C_BASEADDR
 LockAddr: PCI_Express,C_AXIBAR_0
 ICacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 DCacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR

@@ -1,0 +1,10 @@
+##############################################################################
+## Filename:          H:/prj/fpga/xilinx/sdk/ml605_pcie/pcores/axi_msi_v1_00_a/data/axi_msi_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Thu Oct 14 16:15:33 2021 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib axi_lite_ipif_v1_01_a  all 
+lib axi_msi_v1_00_a user_logic vhdl
+lib axi_msi_v1_00_a axi_msi vhdl

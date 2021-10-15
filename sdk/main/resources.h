@@ -19,6 +19,8 @@ void cleanup_platform();
 void ScanAXIBAR(u32 Word, u32 AXIBAR);
 void WrAXIBAR(u32 word);
 void led_blinker(u8 GpioWidth);
+void test_pci_read();
+
 
 #endif
 
