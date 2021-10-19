@@ -35,6 +35,8 @@ entity axi_msi is
 		MSI_Enable			: in  std_logic;
 		MSI_Width			: in  std_logic_vector(2 downto 0);
 		MSI_Num				: out std_logic_vector(4 downto 0);
+		
+		Interrupt 			: out std_logic;
 
 		S_AXI_ACLK 			: in  std_logic;
 		S_AXI_ARESETN 		: in  std_logic;
@@ -163,6 +165,8 @@ begin
 			MSI_Enable			=> MSI_Enable,
 			MSI_Width			=> MSI_Width,
 			MSI_Num				=> MSI_Num,
+			Interrupt 			=> Interrupt,
+
 
 			Bus2IP_Clk 			=> ipif_Bus2IP_Clk,
 			Bus2IP_Resetn 		=> ipif_Bus2IP_Resetn,

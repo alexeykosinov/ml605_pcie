@@ -40,8 +40,16 @@ u32 BRAM_TX_Buff[BUF_LENGTH];
 u32 DDR_RX_Buf[BUF_LENGTH];
 u32 DDR_TX_Buf[BUF_LENGTH];
 
+int cnt = 0;
+
 u32 msi_status(u32 MSI_Controller);
 void msi_request(u32 MSI_Controller, u8 MSI_Num);
+void init_interrupts();
+
+void pcie_handler(void *baseaddr_p) {
+	xil_printf (">> PCIE IRQ Message Accured, total %d\n", cnt);
+	cnt++;
+}
 
 /* Функция обратного вызова UART */
 void uart_handler(void *baseaddr_p) {
@@ -105,6 +113,8 @@ void uart_handler(void *baseaddr_p) {
 		}
 	}
 }
+
+
 
 void enable_caches() {
     Xil_ICacheEnable();
@@ -173,13 +183,7 @@ int init_platform(){
 	// DMA_PrintInfo();
 	// xil_printf("\n");
 
-    /* Конфигурация прерываний для UART */
-	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
-	XIntc_MasterEnable(INTC_BASEADDR);
-	XIntc_EnableIntr(INTC_BASEADDR, UART_INTERRUPT_MASK);
-	XUartLite_EnableIntr(UART_BASEADDR);
-
-	microblaze_enable_interrupts();
+	init_interrupts();
 
 
 	return XST_SUCCESS;
@@ -213,4 +217,21 @@ void msi_request(u32 MSI_Controller, u8 MSI_Num){
 	MsiPtr[1] = ((MSI_Num << 1) | temp | 0x1);
 	xil_printf ("MSI REG1 set  : 0x%08X\n", MsiPtr[1]);
 	MsiPtr[1] = 0x0;
+}
+
+void init_interrupts() {
+
+    /* Конфигурация прерываний для UART */
+	XIntc_RegisterHandler(INTC_BASEADDR, UART_INTERRUPT_INTR, (XInterruptHandler)uart_handler, (void *)UART_BASEADDR);
+
+	/* Конфигурация прерываний для MSI */
+	XIntc_RegisterHandler(INTC_BASEADDR, XPAR_MICROBLAZE_0_INTC_AXI_MSI_0_INTERRUPT_INTR, (XInterruptHandler)pcie_handler, (void *)XPAR_AXI_MSI_0_BASEADDR);
+	
+	XIntc_MasterEnable(INTC_BASEADDR);
+	XIntc_EnableIntr(INTC_BASEADDR, INTC_INTERRUPT_MASK);
+	XUartLite_EnableIntr(UART_BASEADDR);
+	XUartLite_EnableIntr(XPAR_AXI_MSI_0_BASEADDR);
+
+	microblaze_enable_interrupts();
+	
 }

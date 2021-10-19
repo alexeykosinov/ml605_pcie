@@ -108,7 +108,7 @@ BEGIN axi_intc
  BUS_INTERFACE S_AXI = axi4lite_0
  BUS_INTERFACE INTERRUPT = microblaze_0_interrupt
  PORT S_AXI_ACLK = clk_100_0000MHzMMCM0
- PORT INTR = axi_timer_0_Interrupt & RS232_Uart_1_Interrupt
+ PORT INTR = axi_timer_0_Interrupt & RS232_Uart_1_Interrupt & axi_msi_0_Interrupt
 END
 
 BEGIN lmb_v10
@@ -406,5 +406,6 @@ BEGIN axi_msi
  PORT MSI_Enable = axi_msi_0_MSI_Enable
  PORT MSI_Width = axi_msi_0_MSI_Width
  PORT MSI_Num = axi_msi_0_MSI_Num
+ PORT Interrupt = axi_msi_0_Interrupt
 END
 

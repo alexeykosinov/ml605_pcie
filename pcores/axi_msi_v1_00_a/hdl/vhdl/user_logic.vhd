@@ -14,6 +14,7 @@ entity user_logic is
 	port (
 		INTX_MSI_Grant 		: in  std_logic;
 		INTX_MSI_Request 	: out std_logic;
+		Interrupt 			: out std_logic;
 
 		MSI_Enable			: in  std_logic;
 		MSI_Width			: in  std_logic_vector(2 downto 0);
@@ -163,6 +164,7 @@ begin
 	
 	MSI_Num <= slv_reg1(5 downto 1);
 
+	Interrupt <= INTX_MSI_Grant when MSI_Enable = '1' else '0';
 
     process(Bus2IP_Clk)
     begin
@@ -171,5 +173,7 @@ begin
 			INTX_MSI_Request	<= resync(1) and not(resync(2));
         end if;
     end process;
+
+
 
 end architecture;
