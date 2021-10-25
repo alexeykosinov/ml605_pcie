@@ -13,7 +13,7 @@ BSP_DIR 		:= ../ml605_bsp/microblaze_0
 RM 				:= rm -r
 DIR_GUARD 		:= @mkdir -p $(ACTIVE_CONFIG)
 
-all: $(O_SRCS) link check
+default: $(O_SRCS) link check
 
 $(ACTIVE_CONFIG)/%.o: %.c
 	$(DIR_GUARD)
@@ -29,4 +29,4 @@ check: link
 clean:
 	$(RM) $(ACTIVE_CONFIG)
 
-.PHONY: all clean
+.PHONY: default clean

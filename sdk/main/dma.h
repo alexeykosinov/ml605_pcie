@@ -2,7 +2,16 @@
 #define __DMA_H_
 
 #include "xbasic_types.h"
-#include "xaxicdma.h"
+
+// #define CDMA
+
+#ifdef CDMA
+	#include "xaxicdma.h"
+	#define AXI_DMA_BASEADDR XPAR_AXICDMA_0_BASEADDR
+#else
+	#include "xaxidma.h"
+	#define AXI_DMA_BASEADDR XPAR_AXIDMA_0_BASEADDR
+#endif
 
 #define AXI_DMA_MM2S_DMACR      0x00        /* MM2S DMA Control Register        */
 #define AXI_DMA_MM2S_DMASR      0x04        /* MM2S DMA Status Register         */
@@ -29,7 +38,11 @@ typedef struct SGDesc {
 } SGDesc;
 
 void DMA_PrintInfo();
-int DMA_Init(XAxiCdma *DmaInstance);
+#ifdef CDMA
+	int DMA_Init(XAxiCdma *DmaInstance);
+#else
+	int DMA_Init(XAxiDma *DmaInstance);
+#endif
 void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount);
 
 #endif

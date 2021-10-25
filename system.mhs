@@ -12,6 +12,9 @@
  PARAMETER VERSION = 2.1.0
 
 
+# ##############################################################################
+# EXTERNAL PINS
+# ##############################################################################
  PORT ddr_memory_we_n = ddr_memory_we_n, DIR = O
  PORT ddr_memory_ras_n = ddr_memory_ras_n, DIR = O
  PORT ddr_memory_odt = ddr_memory_odt, DIR = O
@@ -49,6 +52,10 @@
  PORT Linear_Flash_ce_n = Linear_Flash_ce_n, DIR = O
 
 
+# ##############################################################################
+# ##############################################################################
+# DONT TOUCH STUFF
+# ##############################################################################
 BEGIN axi_emc
  PARAMETER INSTANCE = xcf128x
  PARAMETER HW_VER = 1.03.b
@@ -233,47 +240,6 @@ BEGIN clock_generator
  PORT PSDONE = psdone
 END
 
-BEGIN axi_v6_ddrx
- PARAMETER INSTANCE = axi_v6_ddrx_0
- PARAMETER HW_VER = 1.06.a
- PARAMETER C_MEM_PARTNO = MT41J64M16XX-15E
- PARAMETER C_DM_WIDTH = 1
- PARAMETER C_DQS_WIDTH = 1
- PARAMETER C_DQ_WIDTH = 8
- PARAMETER C_INTERCONNECT_S_AXI_MASTERS = microblaze_0.M_AXI_DC & microblaze_0.M_AXI_IC & PCI_Express.M_AXI
- PARAMETER C_MMCM_EXT_LOC = MMCM_ADV_X0Y8
- PARAMETER C_S_AXI_SUPPORTS_NARROW_BURST = 1
- PARAMETER C_INTERCONNECT_S_AXI_AR_REGISTER = 8
- PARAMETER C_INTERCONNECT_S_AXI_R_REGISTER = 8
- PARAMETER C_NDQS_COL0 = 1
- PARAMETER C_NDQS_COL1 = 0
- PARAMETER C_S_AXI_BASEADDR = 0xc0000000
- PARAMETER C_S_AXI_HIGHADDR = 0xcfffffff
- BUS_INTERFACE S_AXI = axi4_0
- PORT ddr_we_n = ddr_memory_we_n
- PORT ddr_ras_n = ddr_memory_ras_n
- PORT ddr_odt = ddr_memory_odt
- PORT ddr_dqs_n = ddr_memory_dqs_n
- PORT ddr_dqs_p = ddr_memory_dqs
- PORT ddr_dq = ddr_memory_dq
- PORT ddr_dm = ddr_memory_dm
- PORT ddr_reset_n = ddr_memory_ddr3_rst
- PORT ddr_cs_n = ddr_memory_cs_n
- PORT ddr_ck_n = ddr_memory_clk_n
- PORT ddr_ck_p = ddr_memory_clk
- PORT ddr_cke = ddr_memory_cke
- PORT ddr_cas_n = ddr_memory_cas_n
- PORT ddr_ba = ddr_memory_ba
- PORT ddr_addr = ddr_memory_addr
- PORT clk_rd_base = clk_400_0000MHzMMCM0_nobuf_varphase
- PORT clk_mem = clk_400_0000MHzMMCM0
- PORT clk = clk_200_0000MHzMMCM0
- PORT clk_ref = clk_200_0000MHzMMCM0
- PORT PD_PSEN = psen
- PORT PD_PSINCDEC = psincdec
- PORT PD_PSDONE = psdone
-END
-
 BEGIN axi_uartlite
  PARAMETER INSTANCE = axi_uartlite_0
  PARAMETER HW_VER = 1.02.a
@@ -311,6 +277,22 @@ BEGIN util_ds_buf
  PORT IBUF_OUT = PCIe_Diff_Clk
 END
 
+BEGIN axi_msi
+ PARAMETER INSTANCE = axi_msi_0
+ PARAMETER HW_VER = 1.00.a
+ PARAMETER C_NUM_REG = 2
+ PARAMETER C_BASEADDR = 0x7ee00000
+ PARAMETER C_HIGHADDR = 0x7ee0ffff
+ BUS_INTERFACE S_AXI = axi4lite_0
+ PORT S_AXI_ACLK = clk_100_0000MHzMMCM0
+ PORT INTX_MSI_Grant = axi_msi_0_INTX_MSI_Grant
+ PORT INTX_MSI_Request = axi_msi_0_INTX_MSI_Request
+ PORT MSI_Enable = axi_msi_0_MSI_Enable
+ PORT MSI_Width = axi_msi_0_MSI_Width
+ PORT MSI_Num = axi_msi_0_MSI_Num
+ PORT Interrupt = axi_msi_0_Interrupt
+END
+
 BEGIN axi_interconnect
  PARAMETER INSTANCE = axi4lite_0
  PARAMETER HW_VER = 1.06.a
@@ -322,20 +304,73 @@ END
 BEGIN axi_interconnect
  PARAMETER INSTANCE = axi4_0
  PARAMETER HW_VER = 1.06.a
- PORT interconnect_aclk = clk_200_0000MHzMMCM0
+ PORT interconnect_aclk = clk_100_0000MHzMMCM0
  PORT INTERCONNECT_ARESETN = proc_sys_reset_0_Interconnect_aresetn
 END
 
-BEGIN axi2axi_connector
- PARAMETER INSTANCE = axi4lite_0_to_axi4_0_connector
- PARAMETER HW_VER = 1.00.a
- PARAMETER C_S_AXI_NUM_ADDR_RANGES = 2
- PARAMETER C_S_AXI_RNG00_BASEADDR = 0x72000000
- PARAMETER C_S_AXI_RNG00_HIGHADDR = 0x723fffff
- PARAMETER C_S_AXI_RNG01_BASEADDR = 0xc0000000
- PARAMETER C_S_AXI_RNG01_HIGHADDR = 0xcfffffff
- BUS_INTERFACE M_AXI = axi4_0
- BUS_INTERFACE S_AXI = axi4lite_0
+# ##############################################################################
+BEGIN axi_v6_ddrx
+ PARAMETER INSTANCE = axi_v6_ddrx_0
+ PARAMETER HW_VER = 1.06.a
+ PARAMETER C_MEM_PARTNO = MT41J64M16XX-15E
+ PARAMETER C_DM_WIDTH = 1
+ PARAMETER C_DQS_WIDTH = 1
+ PARAMETER C_DQ_WIDTH = 8
+ PARAMETER C_INTERCONNECT_S_AXI_MASTERS = microblaze_0.M_AXI_DC & microblaze_0.M_AXI_IC & axi_dma_0.M_AXI_SG & axi_dma_0.M_AXI_MM2S & axi_dma_0.M_AXI_S2MM & axi4lite_0_to_axi4_0_connector.M_AXI
+ PARAMETER C_MMCM_EXT_LOC = MMCM_ADV_X0Y8
+ PARAMETER C_S_AXI_SUPPORTS_NARROW_BURST = 1
+ PARAMETER C_INTERCONNECT_S_AXI_AR_REGISTER = 8
+ PARAMETER C_INTERCONNECT_S_AXI_R_REGISTER = 8
+ PARAMETER C_NDQS_COL0 = 1
+ PARAMETER C_NDQS_COL1 = 0
+ PARAMETER C_S_AXI_BASEADDR = 0xc0000000
+ PARAMETER C_S_AXI_HIGHADDR = 0xcfffffff
+ BUS_INTERFACE S_AXI = axi4_0
+ PORT ddr_we_n = ddr_memory_we_n
+ PORT ddr_ras_n = ddr_memory_ras_n
+ PORT ddr_odt = ddr_memory_odt
+ PORT ddr_dqs_n = ddr_memory_dqs_n
+ PORT ddr_dqs_p = ddr_memory_dqs
+ PORT ddr_dq = ddr_memory_dq
+ PORT ddr_dm = ddr_memory_dm
+ PORT ddr_reset_n = ddr_memory_ddr3_rst
+ PORT ddr_cs_n = ddr_memory_cs_n
+ PORT ddr_ck_n = ddr_memory_clk_n
+ PORT ddr_ck_p = ddr_memory_clk
+ PORT ddr_cke = ddr_memory_cke
+ PORT ddr_cas_n = ddr_memory_cas_n
+ PORT ddr_ba = ddr_memory_ba
+ PORT ddr_addr = ddr_memory_addr
+ PORT clk_rd_base = clk_400_0000MHzMMCM0_nobuf_varphase
+ PORT clk_mem = clk_400_0000MHzMMCM0
+ PORT clk = clk_200_0000MHzMMCM0
+ PORT clk_ref = clk_200_0000MHzMMCM0
+ PORT PD_PSEN = psen
+ PORT PD_PSINCDEC = psincdec
+ PORT PD_PSDONE = psdone
+END
+
+BEGIN axi_dma
+ PARAMETER INSTANCE = axi_dma_0
+ PARAMETER HW_VER = 6.03.a
+ PARAMETER C_SG_INCLUDE_DESC_QUEUE = 1
+ PARAMETER C_SG_LENGTH_WIDTH = 23
+ PARAMETER C_M_AXI_MM2S_DATA_WIDTH = 64
+ PARAMETER C_M_AXIS_MM2S_TDATA_WIDTH = 64
+ PARAMETER C_MM2S_BURST_SIZE = 256
+ PARAMETER C_M_AXI_S2MM_DATA_WIDTH = 64
+ PARAMETER C_S_AXIS_S2MM_TDATA_WIDTH = 64
+ PARAMETER C_S2MM_BURST_SIZE = 256
+ PARAMETER C_BASEADDR = 0x40004000
+ PARAMETER C_HIGHADDR = 0x40007fff
+ BUS_INTERFACE S_AXI_LITE = axi4lite_0
+ BUS_INTERFACE M_AXI_SG = axi4_0
+ BUS_INTERFACE M_AXI_MM2S = axi4_0
+ BUS_INTERFACE M_AXI_S2MM = axi4_0
+ PORT s_axi_lite_aclk = clk_100_0000MHzMMCM0
+ PORT m_axi_sg_aclk = clk_100_0000MHzMMCM0
+ PORT m_axi_mm2s_aclk = clk_100_0000MHzMMCM0
+ PORT m_axi_s2mm_aclk = clk_100_0000MHzMMCM0
 END
 
 BEGIN axi_pcie
@@ -354,7 +389,7 @@ BEGIN axi_pcie
  PARAMETER C_INTERRUPT_PIN = 0
  PARAMETER C_COMP_TIMEOUT = 1
  PARAMETER C_INCLUDE_RC = 0
- PARAMETER C_S_AXI_SUPPORTS_NARROW_BURST = 0
+ PARAMETER C_S_AXI_SUPPORTS_NARROW_BURST = 1
  PARAMETER C_INCLUDE_BAROFFSET_REG = 1
  PARAMETER C_S_AXI_CTL_ACLK_FREQ_HZ = 125000000
  PARAMETER C_AXI_ACLK_FREQ_HZ = 125000000
@@ -362,20 +397,22 @@ BEGIN axi_pcie
  PARAMETER C_AXIBAR_NUM = 1
  PARAMETER C_AXIBAR2PCIEBAR_0 = 0xA0000000
  PARAMETER C_AXIBAR_AS_0 = 1
- PARAMETER C_PCIEBAR_NUM = 1
+ PARAMETER C_PCIEBAR_NUM = 2
  PARAMETER C_PCIEBAR_AS = 0
- PARAMETER C_PCIEBAR_LEN_0 = 22
- PARAMETER C_PCIEBAR2AXIBAR_0 = 0xC0000000
- PARAMETER C_INTERCONNECT_S_AXI_MASTERS = axi4lite_0_to_axi4_0_connector.M_AXI
+ PARAMETER C_PCIEBAR_LEN_0 = 14
+ PARAMETER C_PCIEBAR2AXIBAR_0 = 0x40004000
  PARAMETER C_NUM_MSI_REQ = 2
  PARAMETER C_REV_ID = 0x01
+ PARAMETER C_PCIEBAR_LEN_1 = 14
+ PARAMETER C_PCIEBAR2AXIBAR_1 = 0x40000000
+ PARAMETER C_INTERCONNECT_S_AXI_MASTERS = axi_dma_0.M_AXI_SG & axi_dma_0.M_AXI_MM2S & axi_dma_0.M_AXI_S2MM & axi4lite_0_to_axi4_0_connector.M_AXI
  PARAMETER C_AXIBAR_0 = 0x72000000
  PARAMETER C_AXIBAR_HIGHADDR_0 = 0x723fffff
  PARAMETER C_BASEADDR = 0x40000000
  PARAMETER C_HIGHADDR = 0x40003fff
  BUS_INTERFACE S_AXI_CTL = axi4lite_0
- BUS_INTERFACE M_AXI = axi4_0
  BUS_INTERFACE S_AXI = axi4_0
+ BUS_INTERFACE M_AXI = axi4lite_0
  PORT pci_exp_txp = PCI_Express_pci_exp_txp
  PORT pci_exp_txn = PCI_Express_pci_exp_txn
  PORT pci_exp_rxp = PCI_Express_pci_exp_rxp
@@ -393,19 +430,15 @@ BEGIN axi_pcie
  PORT INTX_MSI_Request = axi_msi_0_INTX_MSI_Request
 END
 
-BEGIN axi_msi
- PARAMETER INSTANCE = axi_msi_0
+BEGIN axi2axi_connector
+ PARAMETER INSTANCE = axi4lite_0_to_axi4_0_connector
  PARAMETER HW_VER = 1.00.a
- PARAMETER C_NUM_REG = 2
- PARAMETER C_BASEADDR = 0x7ee00000
- PARAMETER C_HIGHADDR = 0x7ee0ffff
+ PARAMETER C_S_AXI_NUM_ADDR_RANGES = 2
+ PARAMETER C_S_AXI_RNG00_BASEADDR = 0x72000000
+ PARAMETER C_S_AXI_RNG00_HIGHADDR = 0x723fffff
+ PARAMETER C_S_AXI_RNG01_BASEADDR = 0xc0000000
+ PARAMETER C_S_AXI_RNG01_HIGHADDR = 0xcfffffff
+ BUS_INTERFACE M_AXI = axi4_0
  BUS_INTERFACE S_AXI = axi4lite_0
- PORT S_AXI_ACLK = clk_100_0000MHzMMCM0
- PORT INTX_MSI_Grant = axi_msi_0_INTX_MSI_Grant
- PORT INTX_MSI_Request = axi_msi_0_INTX_MSI_Request
- PORT MSI_Enable = axi_msi_0_MSI_Enable
- PORT MSI_Width = axi_msi_0_MSI_Width
- PORT MSI_Num = axi_msi_0_MSI_Num
- PORT Interrupt = axi_msi_0_Interrupt
 END
 

@@ -31,6 +31,8 @@ LockAddr: PCI_Express,C_BASEADDR
 LockAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 LockAddr: PCI_Express,C_BASEADDR
 LockAddr: PCI_Express,C_AXIBAR_0
+LockAddr: axi_cdma_0,C_BASEADDR
+LockAddr: axi_dma_0,C_BASEADDR
 ICacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 DCacheAddr: axi_v6_ddrx_0,C_S_AXI_BASEADDR
 Processor: microblaze_0

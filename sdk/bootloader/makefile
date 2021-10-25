@@ -2,7 +2,6 @@
 MBGCC=D:\_files\Xilinx\14.7\ISE_DS\EDK\gnu\microblaze\nt\bin
 export PATH:=$(MBGCC);$(PATH)
 
-
 PRJ_NAME := bootloader
 C_SRC += $(wildcard *.c)
 C_OBJ += $(patsubst %.c,%.o,$(C_SRC))
@@ -12,7 +11,7 @@ MB_OPT := -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mcpu=v8.50.c -
 BSP_DIR := ../ml605_bsp/microblaze_0
 RM := rm -rf
 
-all: build link check
+default: clean build link check
 
 build: 
 	mb-gcc -Wall -Os -c -fmessage-length=0 -I $(BSP_DIR)/include $(MB_OPT) -ffunction-sections -fdata-sections -MMD -MP -MF $(PRJ_NAME).d -MT $(PRJ_NAME).d -o $(C_OBJ) $(C_SRC)
@@ -31,4 +30,4 @@ clean:
 	$(RM) *.elfcheck
 	$(RM) *.size
 
-.PHONY: all clean
+.PHONY: default clean

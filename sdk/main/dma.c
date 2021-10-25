@@ -1,8 +1,12 @@
 #include "dma.h"
-#include "xaxicdma_hw.h"
+
 #include "xil_cache.h"
 
-int DMA_Init(XAxiCdma *DmaInstance) {
+
+#ifdef CDMA
+	#include "xaxicdma_hw.h"
+
+	int DMA_Init(XAxiCdma *DmaInstance) {
 	int status;
 	XAxiCdma_Config* ConfigPtr;
 
@@ -21,21 +25,49 @@ int DMA_Init(XAxiCdma *DmaInstance) {
 	return status;
 }
 
+#else
+	#include "xaxidma_hw.h"
+
+	int DMA_Init(XAxiDma *DmaInstance) {
+		int status;
+		XAxiDma_Config* ConfigPtr;
+
+		ConfigPtr = XAxiDma_LookupConfig(0);
+		if (ConfigPtr == NULL) {
+			xil_printf("[ E ] DMA: Configuration couldn't be found\n");
+			return XST_FAILURE;
+		}
+
+		status = XAxiDma_CfgInitialize(DmaInstance, ConfigPtr);
+		if (status != XST_SUCCESS) {
+			xil_printf("[ E ] DMA: Failed to configure instance\n");
+			return XST_FAILURE;
+		}
+
+		return status;
+	}
+
+#endif
+
+
+
+
+
 void DMA_PrintInfo() {
 	xil_printf("[ I ] DMA: MM2S / S2MM\n");
-	xil_printf("[ I ] Control Register            - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_DMACR),
-																		Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_DMACR));
+	xil_printf("[ I ] Control Register            - 0x%08X / 0x%08X\n", Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_DMACR),
+																		Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_DMACR));
 
-	xil_printf("[ I ] Status Register             - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_DMASR),
-																		Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_DMASR));
+	xil_printf("[ I ] Status Register             - 0x%08X / 0x%08X\n", Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_DMASR),
+																		Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_DMASR));
 
-	xil_printf("[ I ] Current Descriptor Pointer  - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_CURDESC),
-																		Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_CURDESC));
+	xil_printf("[ I ] Current Descriptor Pointer  - 0x%08X / 0x%08X\n", Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_CURDESC),
+																		Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_CURDESC));
 
-	xil_printf("[ I ] Tail Descriptor Pointer     - 0x%08X / 0x%08X\n", Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_TAILDESC),
-																		Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_TAILDESC));
+	xil_printf("[ I ] Tail Descriptor Pointer     - 0x%08X / 0x%08X\n", Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_TAILDESC),
+																		Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_TAILDESC));
 
-	xil_printf("[ I ] SG User and Cache           - 0x%08X\n", Xil_In32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_SG_CTL));
+	xil_printf("[ I ] SG User and Cache           - 0x%08X\n", Xil_In32(AXI_DMA_BASEADDR + AXI_DMA_SG_CTL));
 }
 
 void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount){
@@ -123,18 +155,18 @@ void DMA_SG_Test(u32 *TxBuffer[], u32 *RxBuffer[], u16 BufferSize, u16 DescCount
 	/** Write pointer for last descriptor */
 	Xil_Out32(DescAddr, DescAddr);
 
-    Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_DMACR, 0x0001DFE6); // Toggle reset 
-    Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_DMACR, 0x0001DFE2); // Toggle reset 
-    Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_DMACR, 0x0001DFE6); // Toggle reset 
-    Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_DMACR, 0x0001DFE2); // Toggle reset 
+    Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_DMACR, 0x0001DFE6); // Toggle reset 
+    Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_DMACR, 0x0001DFE2); // Toggle reset 
+    Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_DMACR, 0x0001DFE6); // Toggle reset 
+    Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_DMACR, 0x0001DFE2); // Toggle reset 
 
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_CURDESC,  0x40004000); 	// S2MM_CURDESC
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_DMACR,    0x0001DFE3); 	// S2MM_DMACR
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_S2MM_TAILDESC, 0x40007FC0); 	// S2MM_TAILDESC
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_CURDESC,  0x40004000); 	// S2MM_CURDESC
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_DMACR,    0x0001DFE3); 	// S2MM_DMACR
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_S2MM_TAILDESC, 0x40007FC0); 	// S2MM_TAILDESC
 
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_CURDESC,  0x40000000); 	// MM2S_CURDESC
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_DMACR,    0x0001DFE3); 	// MM2S_DMACR
-	Xil_Out32(XPAR_AXICDMA_0_BASEADDR + AXI_DMA_MM2S_TAILDESC, 0x40003FC0); 	// MM2S_TAILDESC
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_CURDESC,  0x40000000); 	// MM2S_CURDESC
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_DMACR,    0x0001DFE3); 	// MM2S_DMACR
+	Xil_Out32(AXI_DMA_BASEADDR + AXI_DMA_MM2S_TAILDESC, 0x40003FC0); 	// MM2S_TAILDESC
 
     /* Wait ready in last descriptor */
     while(1) {

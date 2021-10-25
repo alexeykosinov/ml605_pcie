@@ -5,15 +5,19 @@
 #include "xil_cache.h"
 #include "xil_io.h"
 #include "xil_printf.h"
-// #include "xaxicdma.h"
+
 #include "xaxipcie.h"
 #include "xtmrctr.h"
 #include "xuartlite_l.h"
 #include "xintc_l.h"
 #include "xgpio.h"
-
+#ifdef CDMA
+	#include "xaxicdma.h"
+#else
+	#include "xaxidma.h"
+#endif
 #include "pcie.h"
-// #include "dma.h"
+#include "dma.h"
 
 #define SADDR0 		XPAR_BRAM_0_BASEADDR
 #define DADDR0 		XPAR_V6DDR_0_S_AXI_BASEADDR + 0x00000100
@@ -21,6 +25,11 @@
 #define BUF_LENGTH 	64
 
 static XAxiPcie pcieInst;
+#ifdef CDMA
+static XAxiCdma dmaInst;
+#else
+static XAxiDma dmaInst;
+#endif
 static XGpio GpioOutput;
 static XAxiPcie_BarAddr barAddrPtr;
 
@@ -33,6 +42,7 @@ u32 *PciePtr 	= (u32 *) XPAR_AXIPCIE_0_BASEADDR;
 u32 *AxiBarPtr	= (u32 *) XPAR_AXIPCIE_0_AXIBAR_0;
 u32 *DdrPtr		= (u32 *) XPAR_V6DDR_0_S_AXI_BASEADDR;
 u32 *MsiPtr		= (u32 *) XPAR_AXI_MSI_0_BASEADDR;
+
 
 u32 BRAM_RX_Buff[BUF_LENGTH];
 u32 BRAM_TX_Buff[BUF_LENGTH];
@@ -68,11 +78,13 @@ void uart_handler(void *baseaddr_p) {
 
 			}
 			else if (strncmp(Rx_data, "rpci", Rx_indx) == 0) {
-				xil_printf (">> READ PCI Regs\n");
+				xil_printf(">> READ PCI Regs\n");
 				pci_update_reg(&pcieInst);
 				PCIe_PrintInfo(&pcieInst);
-				xil_printf ("\n");
+				xil_printf("\n");
 				GetMSICapStruct(&pcieInst);
+				xil_printf("\n");
+				DMA_Init(&dmaInst);
 			}
 			else if (strncmp(Rx_data, "wrbar", Rx_indx) == 0) {
 				xil_printf (">> WRITE BAR\n");
@@ -175,13 +187,13 @@ int init_platform(){
 	xil_printf("\n");
 	
 	/* Инициализация CDMA */
-	// status = DMA_Init(&cdmaInst);
-	// if (status != XST_SUCCESS){
-	// 	xil_printf("%c[1;31m[ E ] DMA: Peripheral is not working properly %c[0m\n", 27, 27);
-	// 	return XST_FAILURE;
-	// }
-	// DMA_PrintInfo();
-	// xil_printf("\n");
+	status = DMA_Init(&dmaInst);
+	if (status != XST_SUCCESS){
+		xil_printf("%c[1;31m[ E ] DMA: Peripheral is not working properly %c[0m\n", 27, 27);
+		return XST_FAILURE;
+	}
+	DMA_PrintInfo();
+	xil_printf("\n");
 
 	init_interrupts();
 
